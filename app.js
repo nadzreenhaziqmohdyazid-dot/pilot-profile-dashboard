@@ -1,59 +1,3 @@
-// Wait for Firebase to be initialized
-async function initializeApp() {
-  // Wait for Firebase to be ready  
-  let attempts = 0;
-  while (!window.firebaseReady && attempts < 50) {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    attempts++;
-  }
-  
-  if (!window.firebaseReady) {
-    console.error("Firebase failed to initialize");
-    alert("Error: Firebase is not initialized. Please check your Firebase configuration.");
-    return;
-  }
-  
-  console.log("Firebase initialized, loading profiles...");
-  
-  // Import Firebase functions
-  const { collection, getDocs, setDoc, doc } = await import("https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js");
-  window.firebaseDb = { collection, getDocs, setDoc, doc };
-  
-  // Now set up event listeners
-  setupEventListeners();
-  
-  // Load profiles
-  await restoreSavedProfiles();
-}
-
-function setupEventListeners() {
-  const uploadInput = document.querySelector("#csv-upload");
-  const searchInput = document.querySelector("#search-input");
-  const statusFilter = document.querySelector("#status-filter");
-  const fleetFilter = document.querySelector("#fleet-filter");
-  const rankFilter = document.querySelector("#rank-filter");
-  const sortFilter = document.querySelector("#sort-filter");
-  const clearFiltersButton = document.querySelector("#clear-filters");
-  const addProfileButton = document.querySelector("#add-profile");
-  const exportCsvButton = document.querySelector("#export-csv");
-  const summaryRow = document.querySelector("#summary-row");
-  const profileDetails = document.querySelector("#profile-details");
-  
-  uploadInput.addEventListener("change", handleUpload);
-  searchInput.addEventListener("input", render);
-  statusFilter.addEventListener("change", render);
-  fleetFilter.addEventListener("change", render);
-  rankFilter.addEventListener("change", render);
-  sortFilter.addEventListener("change", render);
-  clearFiltersButton.addEventListener("click", clearFilters);
-  addProfileButton.addEventListener("click", startNewProfile);
-  exportCsvButton.addEventListener("click", exportProfilesCsv);
-  summaryRow.addEventListener("click", handleSummaryClick);
-  summaryRow.addEventListener("keydown", handleSummaryKeydown);
-  profileDetails.addEventListener("click", handleDetailsClick);
-  profileDetails.addEventListener("submit", handleProfileSave);
-}
-
 const uploadInput = document.querySelector("#csv-upload");
 const searchInput = document.querySelector("#search-input");
 const statusFilter = document.querySelector("#status-filter");
@@ -107,8 +51,7 @@ summaryRow.addEventListener("keydown", handleSummaryKeydown);
 profileDetails.addEventListener("click", handleDetailsClick);
 profileDetails.addEventListener("submit", handleProfileSave);
 
-// Initialize app with Firebase
-initializeApp();
+restoreSavedProfiles();
 
 function handleUpload(event) {
   const [file] = event.target.files;
@@ -815,34 +758,15 @@ function handleProfileSave(event) {
   render();
 }
 
-async function restoreSavedProfiles() {
+function restoreSavedProfiles() {
   try {
-    console.log("Loading profiles from Firebase...");
-    
-    if (!window.firebaseDb) {
-      console.error("Firebase not initialized");
-      profiles = [];
-      selectedStaffNo = "";
-      render();
-      return;
+    const savedProfiles = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    if (Array.isArray(savedProfiles)) {
+      profiles = savedProfiles;
+      selectedStaffNo = localStorage.getItem(SELECTED_KEY) || (profiles[0]?.staffNo || "");
     }
-    
-    const { collection, getDocs } = window.firebaseDb;
-    const db = window.db;
-    
-    const querySnapshot = await getDocs(collection(db, "profiles"));
-    const loadedProfiles = [];
-    querySnapshot.forEach((doc) => {
-      loadedProfiles.push(doc.data());
-    });
-    
-    console.log("Loaded", loadedProfiles.length, "profiles from Firebase");
-    profiles = loadedProfiles;
-    selectedStaffNo = profiles.length ? profiles[0].staffNo : "";
-    
   } catch (error) {
-    console.error('Failed to load profiles from Firebase:', error);
-    alert('Error loading profiles: ' + error.message);
+    console.error('Failed to restore profiles:', error);
     profiles = [];
     selectedStaffNo = "";
   }
@@ -850,31 +774,10 @@ async function restoreSavedProfiles() {
   render();
 }
 
-async function saveProfiles() {
-  try {
-    if (!window.firebaseDb) {
-      console.error("Firebase not initialized, cannot save");
-      throw new Error("Firebase not initialized");
-    }
-    
-    const { setDoc, doc } = window.firebaseDb;
-    const db = window.db;
-    
-    console.log("Saving", profiles.length, "profiles to Firebase...");
-    
-    // Save each profile individually
-    for (const profile of profiles) {
-      const staffNo = profile.staffNo || `profile_${Date.now()}`;
-      await setDoc(doc(db, "profiles", staffNo), profile);
-    }
-    
-    console.log("Profiles saved successfully to Firebase");
-    return true;
-  } catch (error) {
-    console.error('Failed to save profiles to Firebase:', error);
-    console.error('Error details:', error.message, error.stack);
-    throw error;
-  }
+function saveProfiles() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles));
+  localStorage.setItem(SELECTED_KEY, selectedStaffNo);
+  return true;
 }
 
 function clearSavedProfiles() {
