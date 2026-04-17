@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pilot Profile Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="topbar" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Flight Operations</p>
+          <h1 id="page-title">Pilot Profile Dashboard</h1>
+        </div>
+
+        <div class="file-actions">
+          <label class="upload-button" for="csv-upload">
+            Upload CSV
+            <input id="csv-upload" type="file" accept=".csv,text/csv" />
+          </label>
+          <a
+            class="sharepoint-button"
+            href="https://mabitdept.sharepoint.com/:f:/s/FYFOLO/IgD7i2sKpoasS6QmIhUhTR2fAfT6g6yaDx4KOsaMCEX-_l4?e=Gu694s"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open SharePoint
+          </a>
+        </div>
+      </section>
+
+      <section class="status-row" id="summary-row" aria-label="Dashboard summary">
+        <article class="summary-total" data-status="all" data-fleet="all" data-rank="all" tabindex="0">
+          <span id="total-count">0</span>
+          <p>Total pilots</p>
+        </article>
+        <article class="summary-inactive" data-status="inactive" data-fleet="all" data-rank="all" tabindex="0">
+          <span id="inactive-count">0</span>
+          <p>Inactive pilots</p>
+        </article>
+        <article class="summary-active" data-status="active" data-fleet="b737" data-rank="captain" tabindex="0">
+          <span id="b737-active-captain-count">0</span>
+          <p>B737 Active Captains</p>
+        </article>
+        <article class="summary-active" data-status="active" data-fleet="b737" data-rank="copilot" tabindex="0">
+          <span id="b737-active-copilot-count">0</span>
+          <p>B737 Active Co Pilots</p>
+        </article>
+        <article class="summary-active" data-status="active" data-fleet="atr72" data-rank="captain" tabindex="0">
+          <span id="atr72-active-captain-count">0</span>
+          <p>ATR72 Active Captains</p>
+        </article>
+        <article class="summary-active" data-status="active" data-fleet="atr72" data-rank="copilot" tabindex="0">
+          <span id="atr72-active-copilot-count">0</span>
+          <p>ATR72 Active Co Pilots</p>
+        </article>
+        <article class="summary-inactive" data-status="inactive" data-fleet="b737" data-rank="captain" tabindex="0">
+          <span id="b737-inactive-captain-count">0</span>
+          <p>B737 Inactive Captains</p>
+        </article>
+        <article class="summary-inactive" data-status="inactive" data-fleet="b737" data-rank="copilot" tabindex="0">
+          <span id="b737-inactive-copilot-count">0</span>
+          <p>B737 Inactive Co Pilots</p>
+        </article>
+        <article class="summary-inactive" data-status="inactive" data-fleet="atr72" data-rank="captain" tabindex="0">
+          <span id="atr72-inactive-captain-count">0</span>
+          <p>ATR72 Inactive Captains</p>
+        </article>
+        <article class="summary-inactive" data-status="inactive" data-fleet="atr72" data-rank="copilot" tabindex="0">
+          <span id="atr72-inactive-copilot-count">0</span>
+          <p>ATR72 Inactive Co Pilots</p>
+        </article>
+      </section>
+
+      <section class="tools" aria-label="Profile tools">
+        <label>
+          Search
+          <input id="search-input" type="search" placeholder="Name, staff number, rank, fleet" />
+        </label>
+
+        <label>
+          Status
+          <select id="status-filter">
+            <option value="all">All</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </label>
+
+        <label>
+          Fleet
+          <select id="fleet-filter">
+            <option value="all">All fleets</option>
+            <option value="b737">B737-800</option>
+            <option value="atr72">ATR72-500</option>
+          </select>
+        </label>
+
+        <label>
+          Rank
+          <select id="rank-filter">
+            <option value="all">All ranks</option>
+            <option value="captain">Captain</option>
+            <option value="copilot">Co Pilots</option>
+            <option value="first-officer">First Officer</option>
+            <option value="second-officer">Second Officer</option>
+          </select>
+        </label>
+
+        <label>
+          Sort
+          <select id="sort-filter">
+            <option value="name">Name</option>
+            <option value="staffNo">Staff Number</option>
+            <option value="fleet">Fleet</option>
+            <option value="rank">Rank</option>
+          </select>
+        </label>
+
+        <button id="clear-filters" class="clear-filters-button" type="button">Clear filters</button>
+        <button id="add-profile" class="add-profile-button" type="button">Add pilot</button>
+        <button id="export-csv" class="export-csv-button" type="button">Export CSV</button>
+      </section>
+
+      <section class="content-grid">
+        <section class="profiles-panel" aria-labelledby="profiles-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Directory</p>
+              <h2 id="profiles-title">Pilot Profiles</h2>
+            </div>
+            <span id="visible-count">0 shown</span>
+          </div>
+
+          <div id="profile-list" class="profile-list" aria-live="polite"></div>
+        </section>
+
+        <aside class="details-panel" aria-labelledby="details-title">
+          <p class="eyebrow">Selected Profile</p>
+          <h2 id="details-title">Pilot details</h2>
+          <div id="profile-details" class="details-empty">
+            Select a profile after uploading the CSV.
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+      import { getFirestore } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+      
+      // Firebase configuration - REPLACE WITH YOUR OWN
+      const firebaseConfig = {
+        apiKey: "AIzaSyDummyKeyReplaceMeWithYourActualKey",
+        authDomain: "your-project.firebaseapp.com",
+        projectId: "your-project-id",
+        storageBucket: "your-project.appspot.com",
+        messagingSenderId: "123456789",
+        appId: "1:123456789:web:abc123def456"
+      };
+
+      // Initialize Firebase
+      window.firebaseApp = initializeApp(firebaseConfig);
+      window.db = getFirestore(window.firebaseApp);
+      window.firebaseReady = true;
+      
+      // Load app.js after Firebase is ready
+      const script = document.createElement('script');
+      script.src = 'app.js';
+      document.body.appendChild(script);
+    </script>
+  </body>
+</html>
