@@ -1,3 +1,14 @@
+// Live date and time updater
+function updateLiveDateTime() {
+  const dtElem = document.getElementById("live-datetime");
+  if (!dtElem) return;
+  const now = new Date();
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+  dtElem.textContent = now.toLocaleString('en-US', options);
+}
+
+setInterval(updateLiveDateTime, 1000);
+updateLiveDateTime();
 const uploadInput = document.querySelector("#csv-upload");
 const searchInput = document.querySelector("#search-input");
 const statusFilter = document.querySelector("#status-filter");
