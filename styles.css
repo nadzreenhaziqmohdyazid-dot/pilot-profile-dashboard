@@ -4,10 +4,10 @@
   --line: #d8e2df;
   --canvas: #f3f8f8;
   --surface: rgba(255, 255, 255, 0.94);
-  --accent: #0f8f7a;
-  --accent-dark: #075e54;
-  --blue: #217ea5;
-  --blue-soft: #dff2fa;
+  --accent: #ff9800;
+  --accent-dark: #e65100;
+  --blue: #ffb74d;
+  --blue-soft: #fff3e0;
   --warn: #c84659;
   --warn-soft: #ffe4e7;
   --sky: #dff2fa;
@@ -32,7 +32,7 @@ body {
   color: var(--ink);
   font-family: "Plus Jakarta Sans", Arial, Helvetica, sans-serif;
   background:
-    linear-gradient(120deg, rgba(223, 242, 250, 0.94), rgba(221, 245, 234, 0.78), rgba(255, 244, 206, 0.52)),
+    linear-gradient(120deg, rgba(255, 183, 77, 0.18), rgba(255, 152, 0, 0.12), rgba(255, 244, 206, 0.32)),
     var(--canvas);
 }
 
