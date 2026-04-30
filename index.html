@@ -467,6 +467,34 @@ h3 {
   top: 18px;
 }
 
+.details-panel-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.details-panel-head .eyebrow {
+  margin-bottom: 6px;
+}
+
+.details-mobile-close {
+  display: none;
+  min-height: 40px;
+  padding: 0 14px;
+  color: var(--accent-dark);
+  font-weight: 800;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.drawer-backdrop {
+  display: none;
+}
+
 .details-empty {
   min-height: 280px;
   display: grid;
@@ -718,6 +746,10 @@ h3 {
 }
 
 @media (max-width: 560px) {
+  body.drawer-open {
+    overflow: hidden;
+  }
+
   .shell {
     width: 100%;
     padding: 8px 10px 28px;
@@ -760,7 +792,6 @@ h3 {
     width: 100%;
   }
 
-  .upload-button,
   .sharepoint-button {
     width: 100%;
     min-width: 0;
@@ -811,6 +842,65 @@ h3 {
 
   .content-grid {
     gap: 12px;
+  }
+
+  .drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    display: block;
+    background: rgba(16, 35, 31, 0.44);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 180ms ease;
+    z-index: 39;
+  }
+
+  .drawer-backdrop.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .details-panel {
+    position: fixed;
+    inset: auto 0 0 0;
+    top: 0;
+    z-index: 40;
+    width: 100%;
+    height: 100dvh;
+    padding: 16px 14px 28px;
+    overflow: auto;
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -16px 36px rgba(16, 35, 31, 0.18);
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+    transition:
+      transform 220ms ease,
+      opacity 220ms ease;
+  }
+
+  .details-panel.is-open {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .details-panel-head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    margin: -16px -14px 12px;
+    padding: 14px 14px 12px;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .details-mobile-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
   }
 
   .panel-heading {
@@ -1029,14 +1119,23 @@ h3 {
         </section>
 
         <aside class="details-panel" aria-labelledby="details-title">
-          <p class="eyebrow">Selected Profile</p>
-          <h2 id="details-title">Pilot details</h2>
+          <div class="details-panel-head">
+            <div>
+              <p class="eyebrow">Selected Profile</p>
+              <h2 id="details-title">Pilot details</h2>
+            </div>
+            <button id="details-mobile-close" class="details-mobile-close" type="button" data-action="close-drawer">
+              Close
+            </button>
+          </div>
           <div id="profile-details" class="details-empty">
             Select a profile to view details.
           </div>
         </aside>
       </section>
     </main>
+
+    <div id="drawer-backdrop" class="drawer-backdrop" hidden></div>
 
     <script id="embedded-profiles" type="application/json">{
   "profiles": [
@@ -2929,6 +3028,8 @@ const profileList = document.querySelector("#profile-list");
 const profileDetails = document.querySelector("#profile-details");
 const visibleCount = document.querySelector("#visible-count");
 const embeddedProfilesScript = document.querySelector("#embedded-profiles");
+const detailsPanel = document.querySelector(".details-panel");
+const drawerBackdrop = document.querySelector("#drawer-backdrop");
 
 const STORAGE_KEY = "pilotProfileDashboard.profiles";
 const SELECTED_KEY = "pilotProfileDashboard.selectedStaffNo";
@@ -2938,6 +3039,7 @@ let profiles = [];
 let selectedStaffNo = "";
 let isAddingProfile = false;
 let pendingImport = null;
+let isMobileDrawerOpen = false;
 
 const FLEET_OPTIONS = ["ATR72-500", "B737-800"];
 const RANK_OPTIONS = ["Captain", "First Officer", "Second Officer"];
@@ -2966,10 +3068,56 @@ addProfileButton.addEventListener("click", startNewProfile);
 exportCsvButton.addEventListener("click", exportProfilesCsv);
 summaryRow.addEventListener("click", handleSummaryClick);
 summaryRow.addEventListener("keydown", handleSummaryKeydown);
+detailsPanel.addEventListener("click", handleDetailsPanelClick);
 profileDetails.addEventListener("click", handleDetailsClick);
 profileDetails.addEventListener("submit", handleProfileSave);
+drawerBackdrop.addEventListener("click", closeMobileDrawer);
+window.addEventListener("resize", handleViewportResize);
 
 restoreSavedProfiles();
+
+function isMobileViewport() {
+  return window.matchMedia("(max-width: 560px)").matches;
+}
+
+function syncMobileDrawer(profile) {
+  if (!isMobileViewport()) {
+    isMobileDrawerOpen = false;
+    document.body.classList.remove("drawer-open");
+    detailsPanel.classList.remove("is-open");
+    drawerBackdrop.classList.remove("is-visible");
+    drawerBackdrop.hidden = true;
+    return;
+  }
+
+  const shouldOpen = Boolean(profile) && isMobileDrawerOpen;
+  document.body.classList.toggle("drawer-open", shouldOpen);
+  detailsPanel.classList.toggle("is-open", shouldOpen);
+  drawerBackdrop.classList.toggle("is-visible", shouldOpen);
+  drawerBackdrop.hidden = !shouldOpen;
+}
+
+function openMobileDrawer() {
+  if (!isMobileViewport()) {
+    return;
+  }
+
+  isMobileDrawerOpen = true;
+}
+
+function closeMobileDrawer() {
+  isMobileDrawerOpen = false;
+  syncMobileDrawer(getCurrentVisibleSelection());
+}
+
+function getCurrentVisibleSelection() {
+  const filtered = getFilteredProfiles();
+  return filtered.find((profile) => profile.staffNo === selectedStaffNo) || filtered[0] || null;
+}
+
+function handleViewportResize() {
+  syncMobileDrawer(getCurrentVisibleSelection());
+}
 
 function handleUpload(event) {
   const [file] = event.target.files;
@@ -3130,6 +3278,7 @@ function render() {
     card.setAttribute("aria-selected", String(profile.staffNo === selectedStaffNo));
     card.addEventListener("click", () => {
       selectedStaffNo = profile.staffNo;
+      openMobileDrawer();
       render();
     });
 
@@ -3148,6 +3297,16 @@ function render() {
 
   const selected = filtered.find((profile) => profile.staffNo === selectedStaffNo) || filtered[0];
   renderDetails(selected);
+  syncMobileDrawer(selected || null);
+}
+
+function handleDetailsPanelClick(event) {
+  const actionButton = event.target.closest("[data-action='close-drawer']");
+  if (!actionButton) {
+    return;
+  }
+
+  closeMobileDrawer();
 }
 
 function renderImportPreview() {
@@ -3356,7 +3515,9 @@ function applySummaryFilter(summaryCard) {
 function startNewProfile() {
   isAddingProfile = true;
   selectedStaffNo = "";
+  openMobileDrawer();
   renderEditForm(createBlankProfile(), true);
+  syncMobileDrawer(createBlankProfile());
 }
 
 function createBlankProfile() {
