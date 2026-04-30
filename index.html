@@ -4,13 +4,902 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Pilot Profile Dashboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Space+Grotesk:wght@600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="styles.css" />
+    <style>
+:root {
+  --ink: #10231f;
+  --muted: #65736f;
+  --line: #d8e2df;
+  --canvas: #f3f8f8;
+  --surface: rgba(255, 255, 255, 0.94);
+  --accent: #ff9800;
+  --accent-dark: #e65100;
+  --blue: #ffb74d;
+  --blue-soft: #fff3e0;
+  --warn: #c84659;
+  --warn-soft: #ffe4e7;
+  --sky: #dff2fa;
+  --mint: #ddf5ea;
+  --gold: #f4cf69;
+  --gold-soft: #fff4ce;
+  --shadow: 0 18px 45px rgba(16, 35, 31, 0.12);
+  --shadow-strong: 0 20px 46px rgba(16, 35, 31, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--ink);
+  font-family: "Plus Jakarta Sans", Arial, Helvetica, sans-serif;
+  background:
+    linear-gradient(120deg, rgba(255, 183, 77, 0.18), rgba(255, 152, 0, 0.12), rgba(255, 244, 206, 0.32)),
+    var(--canvas);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  letter-spacing: 0;
+}
+
+.shell {
+  width: min(1180px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 28px 0 44px;
+}
+
+.topbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 230px;
+  padding: 28px;
+  color: #fff;
+  overflow: hidden;
+  background:
+    linear-gradient(135deg, var(--accent) 0%, var(--blue) 100%);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: inherit;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  opacity: 0.86;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 10px;
+  font-family: "Space Grotesk", "Plus Jakarta Sans", Arial, Helvetica, sans-serif;
+  font-size: 3.05rem;
+  line-height: 1.05;
+}
+
+h2 {
+  margin-bottom: 0;
+  font-family: "Space Grotesk", "Plus Jakarta Sans", Arial, Helvetica, sans-serif;
+  font-size: 1.28rem;
+}
+
+h3 {
+  font-family: "Space Grotesk", "Plus Jakarta Sans", Arial, Helvetica, sans-serif;
+}
+
+.file-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.topbar > div:first-child {
+  position: relative;
+  z-index: 1;
+  max-width: 620px;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.38);
+}
+
+.banner-credit {
+  position: absolute;
+  right: 14px;
+  bottom: 10px;
+  z-index: 1;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.banner-credit:hover,
+.banner-credit:focus-visible {
+  color: #fff;
+  text-decoration: underline;
+  outline: none;
+}
+
+.upload-button,
+.sharepoint-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 142px;
+  min-height: 46px;
+  padding: 0 18px;
+  color: var(--accent-dark);
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  transition:
+    background 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.sharepoint-button {
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--blue));
+  border-color: rgba(255, 255, 255, 0.24);
+}
+
+.upload-button:hover,
+.upload-button:focus-within,
+.sharepoint-button:hover,
+.sharepoint-button:focus-visible {
+  box-shadow: 0 12px 26px rgba(16, 35, 31, 0.18);
+  transform: translateY(-1px);
+}
+
+.upload-button input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.status-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.status-row article,
+.profiles-panel,
+.details-panel,
+.tools {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 10px 28px rgba(31, 44, 38, 0.08);
+}
+
+.status-row article {
+  min-height: 98px;
+  padding: 18px;
+  border-top: 4px solid var(--accent);
+  cursor: pointer;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 252, 251, 0.94)),
+    var(--surface);
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.status-row article:hover,
+.status-row article:focus-visible {
+  box-shadow: var(--shadow-strong);
+  outline: none;
+  transform: translateY(-3px);
+}
+
+.status-row span {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--accent-dark);
+  font-family: "Space Grotesk", "Plus Jakarta Sans", Arial, Helvetica, sans-serif;
+  font-size: 1.9rem;
+  font-weight: 800;
+}
+
+.status-row p {
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.35;
+}
+
+.summary-total {
+  grid-column: span 2;
+  border-top-color: var(--blue);
+  background:
+    linear-gradient(180deg, rgba(223, 242, 250, 0.9), rgba(255, 255, 255, 0.96)),
+    var(--surface);
+}
+
+.summary-total span {
+  color: var(--blue);
+}
+
+.summary-active {
+  border-top-color: var(--accent);
+  background:
+    linear-gradient(180deg, rgba(221, 245, 234, 0.88), rgba(255, 255, 255, 0.96)),
+    var(--surface);
+}
+
+.summary-inactive {
+  border-top-color: var(--warn);
+  background:
+    linear-gradient(180deg, rgba(255, 228, 231, 0.9), rgba(255, 255, 255, 0.96)),
+    var(--surface);
+}
+
+.summary-inactive span {
+  color: var(--warn);
+}
+
+.tools {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+  padding: 16px;
+}
+
+.tools label:first-child {
+  grid-column: span 2;
+}
+
+.tools label {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.tools input,
+.tools select {
+  width: 100%;
+  min-height: 44px;
+  padding: 0 12px;
+  color: var(--ink);
+  background: #fbfefe;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.tools input:focus,
+.tools select:focus,
+.edit-form input:focus,
+.edit-form textarea:focus,
+.edit-form select:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(33, 126, 165, 0.16);
+  outline: none;
+}
+
+.clear-filters-button,
+.add-profile-button,
+.export-csv-button {
+  align-self: end;
+  min-height: 44px;
+  padding: 0 14px;
+  color: var(--accent-dark);
+  font-weight: 800;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.add-profile-button {
+  color: #fff;
+  background: linear-gradient(135deg, var(--accent), var(--blue));
+  border-color: var(--accent);
+}
+
+.export-csv-button {
+  color: #fff;
+  background: linear-gradient(135deg, var(--blue), #275d93);
+  border-color: var(--blue);
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(320px, 0.75fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.profiles-panel,
+.details-panel {
+  padding: 18px;
+}
+
+.panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+#visible-count {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.profile-list {
+  display: grid;
+  gap: 10px;
+  max-height: 620px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.profile-card {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  width: 100%;
+  min-height: 88px;
+  padding: 12px;
+  text-align: left;
+  background: linear-gradient(90deg, #fff, #f8fcfb);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.profile-card[aria-selected="true"] {
+  border-color: var(--accent);
+  box-shadow:
+    inset 4px 0 0 var(--accent),
+    0 12px 24px rgba(16, 35, 31, 0.1);
+}
+
+.profile-card:hover,
+.profile-card:focus-visible {
+  border-color: var(--blue);
+  box-shadow: 0 14px 28px rgba(16, 35, 31, 0.14);
+  transform: translateY(-1px);
+}
+
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 54px;
+  overflow: hidden;
+  color: var(--accent-dark);
+  font-weight: 800;
+  background: var(--sky);
+  border-radius: 8px;
+}
+
+.profile-card:nth-child(3n) .avatar {
+  background: var(--gold);
+}
+
+.profile-card:nth-child(3n + 1) .avatar {
+  background: var(--mint);
+}
+
+.profile-card h3 {
+  margin-bottom: 5px;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+.profile-meta,
+.profile-address {
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.badge {
+  align-self: start;
+  padding: 6px 9px;
+  color: var(--accent-dark);
+  font-size: 0.76rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--mint), #f4fffb);
+  border-radius: 8px;
+}
+
+.badge.inactive {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.details-panel {
+  position: sticky;
+  top: 18px;
+}
+
+.details-empty {
+  min-height: 280px;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: var(--muted);
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: 8px;
+}
+
+.detail-card {
+  display: grid;
+  gap: 16px;
+}
+
+.import-preview h3 {
+  margin-bottom: 6px;
+}
+
+.import-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.import-stats article {
+  min-height: 86px;
+  padding: 14px;
+  background:
+    linear-gradient(180deg, rgba(223, 242, 250, 0.84), rgba(255, 255, 255, 0.96)),
+    var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.import-stats span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--blue);
+  font-family: "Space Grotesk", "Plus Jakarta Sans", Arial, Helvetica, sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.import-stats p {
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.import-sample-list {
+  display: grid;
+  gap: 9px;
+}
+
+.import-sample-list article {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  padding: 10px;
+  background: linear-gradient(90deg, #fff, #f8fcfb);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.import-sample-list .avatar {
+  width: 44px;
+  height: 44px;
+}
+
+.detail-head {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+}
+
+.detail-head .avatar {
+  width: 72px;
+  height: 72px;
+  font-size: 1.3rem;
+}
+
+.detail-head h3 {
+  margin-bottom: 5px;
+  font-size: 1.35rem;
+}
+
+.detail-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.detail-list div {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.detail-list dt {
+  margin-bottom: 5px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.detail-list dd {
+  margin: 0;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.profile-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.edit-button,
+.save-button,
+.cancel-button,
+.toggle-status-button,
+.delete-profile-button {
+  min-height: 42px;
+  padding: 0 14px;
+  font-weight: 800;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    filter 160ms ease,
+    transform 160ms ease;
+}
+
+.edit-button,
+.save-button {
+  color: #fff;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.toggle-status-button {
+  color: var(--accent-dark);
+  background: linear-gradient(135deg, var(--gold), var(--gold-soft));
+  border: 1px solid #e0c56e;
+}
+
+.cancel-button {
+  color: var(--accent-dark);
+  background: #fff;
+  border: 1px solid var(--line);
+}
+
+.delete-profile-button {
+  color: #fff;
+  background: linear-gradient(135deg, var(--warn), #a93447);
+  border: 1px solid var(--warn);
+}
+
+.edit-button:hover,
+.save-button:hover,
+.cancel-button:hover,
+.toggle-status-button:hover,
+.delete-profile-button:hover,
+.clear-filters-button:hover,
+.add-profile-button:hover,
+.export-csv-button:hover {
+  filter: brightness(0.96);
+  transform: translateY(-1px);
+}
+
+.edit-form {
+  display: grid;
+  gap: 14px;
+}
+
+.edit-form label {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.edit-form input,
+.edit-form textarea,
+.edit-form select {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  color: var(--ink);
+  background: #fbfefe;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.edit-form textarea {
+  resize: vertical;
+}
+
+.form-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.notice {
+  color: var(--warn);
+}
+
+@media (max-width: 860px) {
+  h1 {
+    font-size: 2.4rem;
+  }
+
+  .topbar,
+  .content-grid,
+  .tools {
+    grid-template-columns: 1fr;
+  }
+
+  .tools label:first-child {
+    grid-column: auto;
+  }
+
+  .topbar {
+    display: grid;
+    min-height: 250px;
+    background:
+      radial-gradient(circle at top right, rgba(255, 244, 206, 0.28), transparent 38%),
+      linear-gradient(180deg, rgba(230, 81, 0, 0.9) 0%, rgba(255, 152, 0, 0.78) 48%, rgba(16, 35, 31, 0.18) 100%),
+      linear-gradient(0deg, rgba(16, 35, 31, 0.38), rgba(16, 35, 31, 0.08));
+  }
+
+  .file-actions {
+    justify-content: flex-start;
+  }
+
+  .status-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .details-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 560px) {
+  .shell {
+    width: 100%;
+    padding: 8px 10px 28px;
+  }
+
+  .topbar,
+  .profiles-panel,
+  .details-panel,
+  .tools {
+    padding: 14px;
+  }
+
+  .topbar {
+    min-height: 260px;
+    align-content: end;
+    gap: 16px;
+    background:
+      radial-gradient(circle at top center, rgba(255, 244, 206, 0.24), transparent 42%),
+      linear-gradient(180deg, rgba(230, 81, 0, 0.92) 0%, rgba(255, 152, 0, 0.8) 52%, rgba(16, 35, 31, 0.22) 100%),
+      linear-gradient(0deg, rgba(16, 35, 31, 0.48), rgba(16, 35, 31, 0.08));
+  }
+
+  h1 {
+    max-width: 10ch;
+    font-size: 2.05rem;
+    overflow-wrap: anywhere;
+  }
+
+  h2 {
+    font-size: 1.12rem;
+  }
+
+  .eyebrow {
+    font-size: 0.68rem;
+  }
+
+  .file-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .upload-button,
+  .sharepoint-button {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+  }
+
+  .banner-credit {
+    right: 12px;
+    bottom: 8px;
+    max-width: calc(100% - 24px);
+    font-size: 0.62rem;
+  }
+
+  .status-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 12px 0;
+  }
+
+  .status-row article {
+    min-height: 104px;
+    padding: 12px;
+  }
+
+  .status-row span {
+    font-size: 1.48rem;
+  }
+
+  .status-row p {
+    font-size: 0.78rem;
+  }
+
+  .summary-total {
+    grid-column: auto;
+  }
+
+  .tools {
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .clear-filters-button,
+  .add-profile-button,
+  .export-csv-button {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .content-grid {
+    gap: 12px;
+  }
+
+  .panel-heading {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  #visible-count {
+    padding-top: 2px;
+    font-size: 0.78rem;
+  }
+
+  .profile-list {
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .profile-card {
+    grid-template-columns: 48px minmax(0, 1fr);
+    gap: 10px;
+    min-height: 92px;
+    padding: 10px;
+  }
+
+  .avatar {
+    width: 48px;
+    height: 48px;
+  }
+
+  .profile-card h3 {
+    font-size: 0.94rem;
+  }
+
+  .profile-meta,
+  .profile-address {
+    font-size: 0.78rem;
+  }
+
+  .profile-card .badge {
+    grid-column: 2;
+    justify-self: start;
+    font-size: 0.68rem;
+  }
+
+  .profile-actions,
+  .form-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-head {
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .detail-head .avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 1rem;
+  }
+
+  .detail-head h3 {
+    font-size: 1.08rem;
+    overflow-wrap: anywhere;
+  }
+
+  .import-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .edit-button,
+  .save-button,
+  .cancel-button,
+  .toggle-status-button,
+  .delete-profile-button {
+    min-height: 48px;
+  }
+}
+
+@media (max-width: 380px) {
+  .status-row {
+    grid-template-columns: 1fr;
+  }
+
+  h1 {
+    font-size: 1.85rem;
+  }
+}
+    </style>
   </head>
   <body>
     <main class="shell">
@@ -22,10 +911,6 @@
         </div>
 
         <div class="file-actions">
-          <label class="upload-button" for="csv-upload">
-            Upload CSV
-            <input id="csv-upload" type="file" accept=".csv,text/csv" />
-          </label>
           <a
             class="sharepoint-button"
             href="https://mabitdept.sharepoint.com/:f:/s/FYFOLO/IgD7i2sKpoasS6QmIhUhTR2fAfT6g6yaDx4KOsaMCEX-_l4?e=Gu694s"
@@ -147,12 +1032,2741 @@
           <p class="eyebrow">Selected Profile</p>
           <h2 id="details-title">Pilot details</h2>
           <div id="profile-details" class="details-empty">
-            Select a profile after uploading the CSV.
+            Select a profile to view details.
           </div>
         </aside>
       </section>
     </main>
 
-    <script src="app.js"></script>
+    <script id="embedded-profiles" type="application/json">{
+  "profiles": [
+    {
+      "staffNo": "8500369",
+      "name": "Hussain Ishan",
+      "address": "E13-01, Ara Greens Residence No 6A,, Jln Pju 1A/3 Ara Damansara, Petaling Jaya, Selangor, 47301",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Maldivian",
+      "email": "hussain.ishan@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8500370",
+      "name": "Mikaela Johnson",
+      "address": "B52 Random Address, Subang 2, Subang, Selangor, 46001",
+      "remarks": "Long Leave",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Canadian",
+      "email": "Email not recorded",
+      "active": true
+    },
+    {
+      "staffNo": "2357882",
+      "name": "Chin Yi Yiing",
+      "address": "5,, Jalan Ss 2/82, Petaling Jaya, Selangor, 47300",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "yiyiing.chin@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502084",
+      "name": "Muhammad Farhan Bin Fadzilah",
+      "address": "Lot 3726N, Jln Tembusu, Kg Melayu Subang, Kg Melayu Subang, Shah Alam, Selangor, 40150",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "farhan.fadzilah@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2357887",
+      "name": "Muhammad Adi Hakimi Bin Azhar",
+      "address": "B-08-12, 121 Residences, Lorong Masjid 1, Pju 6A, Petaling Jaya, Selangor, 74700",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "adi.azhar@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2357884",
+      "name": "Abdul Adib Bin Aidil",
+      "address": "35, Jalan Puncak Saujana 7/1, Taman Puncak Saujana Heights, Kajang, Selangor, 43000",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "adib.aidil@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502619",
+      "name": "Afiq Azfar Bin Aminudin",
+      "address": "53, Jln Tropika 2/5,, Tmn Tropika 2, Kajang, Selangor, 43000",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "afiq.aminudin@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358879",
+      "name": "Afiq Fikri Bin Aminuddin",
+      "address": "16, Jalan Teratak U8/95E,, Bukit Jelutong, Shah Alam, Selangor, 40150",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "afiqfikri.aminuddini@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2361789",
+      "name": "Ahmad Haziq Syafie Bin Khairunizam",
+      "address": "No 2, Jalan Warisan Indah 8/6, Kota Warisan, Sepang, Selangor, 43900",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "haziq.khairunizam@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502403",
+      "name": "Ahmad Kamil Bin Zailani Kamarudin",
+      "address": "89 Jalan Sl 2/1,, Sejati Lakeside 2 Cyber 10, Cyberjaya, Selangor, 63000",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "kamil.zailani@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8501795",
+      "name": "Muhammad Aiman Bin Esa",
+      "address": "No 65, Jalan Eco Majestic 7/1D, Eco Majestic, Semenyih, Selangor, 43500",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "aiman.esa@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502620",
+      "name": "Muhammad Aiman Bin Mohd Ghaus",
+      "address": "29, Jalan Salak Mulia 2/1,, Taman Salak Mulia, Sepang, Negeri Sembilan, 43900",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "aiman.ghaus@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358882",
+      "name": "Muhammad Aiman Bin Mohd Hisham",
+      "address": "St-3-7, Saujana Residency,, Ss16/1, Subang Jaya, Selangor, 47500",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "aiman.hisham@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502470",
+      "name": "Aisya Binti Azli",
+      "address": "J1-07-01 Ppam Jintan,, Precint 16, Putrajaya, Wilayah Persekutuan Putrajaya, 62150",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "aisya.azli@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502570",
+      "name": "Akmal Hakim Bin Ramlee @ Hajiman",
+      "address": "No.3, Jalan Rimba Riang 9/7B,, Kota Damansara, Petaling Jaya, Selangor, 47810",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "akmal.ramlee@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2352107",
+      "name": "Nor Aleemy Azram Bin Md Nordin",
+      "address": "No 10, Jalan 2/4,, Bandar Baru Selayang, Batu Caves, Selangor, 68100",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "noraleemyazram.mdnordin@malaysiaairlines.com",
+      "active": true
+    },
+    {
+      "staffNo": "8502410",
+      "name": "Aliff Bin Khairi",
+      "address": "68,, Jalan Ss19/1C, Subang Jaya, Petaling Jaya, Selangor, 47500",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "aliff.khairi@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502624",
+      "name": "Ameerul Attria Bin Ismadi",
+      "address": "11A,, Jln Usj 20/3, Shah Alam, Selangor, 47630",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "ameerul.ismadi@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502515",
+      "name": "Mohd Amin Adha Bin Shaari",
+      "address": "No 25 Jln Au 1C/3H, Taman Keramat Permai, Ampang, Kuala Lumpur, 54200",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "amin.shaari@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2356768",
+      "name": "Amir Faliq Bin Mohd Faruk",
+      "address": "No 3 Medan Athinahapan 2,, Taman Tun Dr Ismail, Kuala Lumpur, Kuala Lumpur, 60000",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "failq.faruk@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502564",
+      "name": "Amira Nuria Anuar",
+      "address": "10, Jalan Kubah U8/48B,, Bukit Jelutong Seksyen U8, Shah Alam, Selangor, 40150",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "amira.anuar@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2357885",
+      "name": "Amirul Burhanuddin Bin Aminuddin",
+      "address": "No 16, Jalan 7/5,, Seksyen 7, Bandar Baru Bangi,, Selangor, 43650",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "amirul.aminuddin@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502414",
+      "name": "Amirul Adli Bin Shaipuddin",
+      "address": "F-05-03, Radia Residensi,, Persiaran Singgahsana, Shah Alam, Selangor, 40150",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "amirul.shaipuddin@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358009",
+      "name": "Mohammad Anuwar Bin Ahmad",
+      "address": "No 35, Jalan C/3 Laman Cempaka,, Kota Seriemas, Nilai, Negeri Sembilan, 71800",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "anuwar.ahmad@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502404",
+      "name": "Nor Ariff Imran Bin Norazman",
+      "address": "31, Jalan Bm 6/1D,, Seksyen 6, Bukit Mahkota, Kajang, Selangor, 43000",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "ariff.norazman@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358874",
+      "name": "Muhammad Arif Bin Shuib",
+      "address": "No.19,, Jalan Usj 9/3E, Subang Jaya,, Selangor, 47620",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "arif.shuib@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358985",
+      "name": "Ashraf Hakimi Bin Akashah",
+      "address": "10, Jalan Kubah U8/48B,, Seksyen U8 Bukit Jelutong, Shah Alam, Selangor, 40150",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "ashraf.akashah@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502512",
+      "name": "Muhammad Asyraf Bin Abd Rahman",
+      "address": "1/A Jln Enclave A,, Persada Aman, Seremban, Negeri Sembilan, 71760",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "asyraf.rahman@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502580",
+      "name": "Asyraf Bin Sulaiman",
+      "address": "19, Jln Pinggiran Putra 2/2,, Desa Pinggiran Putra, Kajang, Selangor, 43000",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "asyraf.sulaiman@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8500587",
+      "name": "Azhar Husaini B. Ghazali",
+      "address": "13 Jalan Elektron U16\\67,, Bukit Subang, Denai Alam, Shah Alam, Selangor, 40000",
+      "remarks": "Resignation - Last day of employment is 5 May 2026",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "azhar.ghazali@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8500627",
+      "name": "Mohd Azim Bin Musa @ Azmi",
+      "address": "No. 42, Jalan Novelis U1/88,, Laman Glenmarie, Seksyen U1, Shah Alam, Selangor, 40150",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "azim.musa@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2357889",
+      "name": "Nor Mohammad Azzan Bin Arifin",
+      "address": "No 23, Jalan Halamanda, Taman Halamanda, Kuala Lumpur, Selangor, 53100",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "azzan.arifin@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2355619",
+      "name": "Che Wan Ibrahim Bin Che Wan Zainuddin",
+      "address": "Jb8222, Jln Seroja 10,, Taman Maju, Jasin, Melaka, 77000",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "cwanibrahim.cwanzainuddin@malaysiaairlines.com",
+      "active": true
+    },
+    {
+      "staffNo": "2358302",
+      "name": "Chin Tze Yee",
+      "address": "41, Jln Puteri 12/26,, Bandar Puteri Puchong, Puchong, Selangor, 47100,",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "tzeyee.chin@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502394",
+      "name": "Danial Warith Bin Abu Bakar",
+      "address": "Hse. No. 294,Lorong 3C,, Taman Kepayan Ridge, Kota Kinabalu, Sabah, 88300",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "warith.bakar@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502412",
+      "name": "Daniel Bin Jufri Khor",
+      "address": "B-05-02,, Pandora Residence, Jalan Mp 1, Shah Alam, Selangor, 47500",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "daniel.jufri@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2357983",
+      "name": "Mohamad Danish Akmal Bin Mohamed Iqbal",
+      "address": "A0709, Embayu Damansara West,, Jalan Zuhrah Bh U5/Bh, Persiaran Kosmos, Taman Subang Murni, Shah Alam, Selangor, 40150",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "danish.iqbal@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2361490",
+      "name": "Dineswaran A/L K Bathuma Nathu",
+      "address": "No 2 Jln Mj 1/13, Taman Meranti Jaya, Puchong, Selangor, 47100",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "dineswaran.kbathumanathu@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502420",
+      "name": "Dinie Bin Abdul Malik",
+      "address": "B-11-09 , Embayu Damansara West, Persiaran Kosmos , Taman Subang Murni, Shah Alam, Selangor, 40150",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "dinie.malik@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358881",
+      "name": "Durankar Kiritharan",
+      "address": "21,Jalan Ara,, Sd7/2A, Kuala Lumpur, Kuala Lumpur, 52200",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "durankar.kiritharan@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8501844",
+      "name": "Edmund Lai Wei Kang",
+      "address": "1290, Jalan Jinjang Damai 10,, Jinjang Utara, Kuala Lumpur, Kuala Lumpur, 52000",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "weikang.lai@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358877",
+      "name": "Elijah Samickanoo A/L Isaac Samuel",
+      "address": "22-01-15, Batu 31/2, Jalan Kelang Lama, Kuala Lumpur, Kuala Lumpur, 58000",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "elijahsamickanoo.isaacsamuel@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8501839",
+      "name": "Wan Emran Shafiee Bin Wan Mohamad",
+      "address": "No 21 Jalan Nadayu 2,, Taman Nadayu 92, Kajang, Selangor, 43000",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "emran.mohamad@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8500322",
+      "name": "Erny Akma Binti Baharuddin",
+      "address": "B11-01 Alam Sanjung Apartment, 22/3 Jalan Budiman Seksyen 22, Shah Alam, Selangor, 40300",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "erny.baharuddin@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2356594",
+      "name": "Ezatul Khamsiah Binti Muhammad Arif",
+      "address": "No. 10,, Jalan Guli 11/1B, Shah Alam, Selangor, 40100",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "ezatul.arif@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502042",
+      "name": "Muhammed Fadzly Bin Muhammed Reduan",
+      "address": "A85, Eve Suite, Jln Pju 1A/41, Petaling Jaya, Selangor, 47301",
+      "remarks": "Other - Admin Leave",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "fadzly.reduan@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358007",
+      "name": "Mohd Fadzuan Bin Mohd Safea",
+      "address": "11, Jalan Aman Serenia 17/9, Bandar Serenia,, Sepang, Selangor, 43900",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "fadzuan.safea@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2361793",
+      "name": "Wan Muhamad Faiz Dani Bin Wan Abdullah Sani",
+      "address": "No 70, Jalan Tun Mamat, 35/91, Alam Impian, Seksyen 35, Shah Alam, Selangor, 40470",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "faizdani.abdullahsani@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502468",
+      "name": "Ahmad Fareez Bin Ahmad Fauzi",
+      "address": "2 Jalan Frekuensi U16/116, Elmina East, Shah Alam, Selangor, 40160",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "fareez.fauzi@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2356766",
+      "name": "Ahmad Farez Bin Rusman",
+      "address": "No 32, Jalan Eco Majestic 2/1C,, Eco Majestic, Semenyih, Selangor, 43500",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "farez.rusman@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502440",
+      "name": "Mohamad Farhan Bin Mohamad Hussin",
+      "address": "T1-20-07@Lakefront Residence,, Persiaran Semarak Api,, Cyberjaya, Selangor, 63000",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "farhan.hussin@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358867",
+      "name": "Nur Fasheeha Binti Roslan",
+      "address": "No 8, Jalan Aman Ceria 3,, Ceria Residences,, Shah Alam, Selangor, 42500",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "fasheeha.roslan@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502088",
+      "name": "Ahmad Fathuddin Bin Mohamad",
+      "address": "47 , Jalan Aman Serenia 2/2, Bandar Serenia, Sepang, Selangor, 43900",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "fathuddin.mohamad@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502027",
+      "name": "Fatin Syairah Binti Muh Puzi",
+      "address": "Lot 493 Jln Limau Bali, Kg Limau Manis,, Desa Pinggiran Putra, Kajang, Selangor, 43000",
+      "remarks": "Long Leave - Maternity Leave",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "fatin.puzi@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2356598",
+      "name": "Mohamad Fhaizzuddin Bin Abd Kadir",
+      "address": "No 3, Jalan Rata 8/1F,, Seksyen 8, Shah Alam, Selangor, 40000",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "fhaizzuddin.abdkadir@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502391",
+      "name": "Muhammad Firdaus Bin Mohamad Zarafi",
+      "address": "23,, Jalan USJ 4/1A, Shah Alam, Selangor, 47600",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "firdaus.zarafi@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502614",
+      "name": "Ghazali Bin Yayah",
+      "address": "No 37, Jln Elektron U16/39,, Denai Alam, Shah Alam, Selangor, 40160",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "ghazali.yayah@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2352017",
+      "name": "Gunageswaran A/L Rajaratnam",
+      "address": "No 30, Jalan Penaga 3Ks/6, Bandar Botanic, Klang, Selangor, 41200",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "gunageswaran.rajaratnam@malaysiaairlines.com",
+      "active": true
+    },
+    {
+      "staffNo": "8502493",
+      "name": "Haansel Ananth Boss",
+      "address": "42, Jalan Tun Dr Ismail, Taman Sri Andalas, Klang, Selangor, 41200",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "haansel.boss@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502442",
+      "name": "Muhammad Hafiz Bin Hisham",
+      "address": "No.30 Jalan Setia Perdana, U13/27C,, Presint 12, Alam Nusantara, Shah Alam, Selangor, 40170",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "hafiz.hisham@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2108962",
+      "name": "Hafiz Hamzani Bin Firdaus Brohier",
+      "address": "14 Jalan Frekuensi U16/126B,, Elmina East, Shah Alam, Selangor, 40160",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "hafiz.firdaus@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502011",
+      "name": "Muhd Haikal Bin Hasrom",
+      "address": "23, Jalan 12/16A, Petaling Jaya, Selangor, 46200",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "haikal.hasrom@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2361494",
+      "name": "Muhammad Haikal Bin Jamal",
+      "address": "A-3A01 Shang Villa Condominium,, Alan Ss7/15, Petaling Jaya, Selangor, 47301",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "haikal.jamal@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2353779",
+      "name": "Mohd Hakimi Bin Abd.Rasib",
+      "address": "No 8 Jalan Setia Perdana U13/26J, Seksyen U13, Shah Alam, Selangor, 40170",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "mohdhakimi.abdrasib@malaysiaairlines.com",
+      "active": true
+    },
+    {
+      "staffNo": "8501838",
+      "name": "Muhammad Hakimi Bin Zarime",
+      "address": "Sejati Residence,, No 3,Jalan Sejati 1B, Sepang, Kelantan, 63000",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "hakimi.zarime@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502508",
+      "name": "Hamzah Bin Ariffin",
+      "address": "B3-22,Bayu Puteri Apartment,, No 3,Jalan Tropicana Selatan Pju 3, Shah Alam, Selangor, 47301",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "hamzah.ariffin@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2351307",
+      "name": "Mohd Hareez Bin Hamzah",
+      "address": "Nadayu 801, F-16-11,, Jln Zuhrah U5, Shah Alam, Selangor, 40150",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "mohdhareez.hamzah01@malaysiaairlines.com",
+      "active": true
+    },
+    {
+      "staffNo": "2358010",
+      "name": "Mohd Hasnul Hafiz Bin Mohd Hasnul Hisham",
+      "address": "15, Jalan Npt 7/1K,, Taman Nusaputra Timur, Puchong, Selangor, 47130",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "hasnulhafiz.hasnulhisham@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502577",
+      "name": "Hassan Bin Abu Bakar",
+      "address": "No 13, Jln U15/5,, Seksyen U15, Shah Alam, Selangor, 40170",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "hassan.abubakar@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502392",
+      "name": "Abdul Hazim Bin Mohd Nadzeri",
+      "address": "No 5, Jalan Kristal,, Seksyen 7, Shah Alam, Selangor, 40000",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "hazim.nadzeri@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8000569",
+      "name": "Mohd Hazman Bin Arfandy",
+      "address": "No. 8 Serenia Adiva, Jalan Aman Serenia 7/13, Bandar Serenia, Sepang, Selangor, 43900",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "mohdhazman.arfandy@malaysiaairlines.com",
+      "active": true
+    },
+    {
+      "staffNo": "8500630",
+      "name": "Khairil Hazri Bin Zulkafli",
+      "address": "B-7-3A Villa Orkid Condominium,, Bukit Prima Pelangi, Kuala Lumpur, Kuala Lumpur, 51200",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "hazri.zulkafli@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2900052",
+      "name": "Muhammad Hazri Aliff Bin Abdul Aziz",
+      "address": "A35-03A, Cerrado,, Jalan Southville 1,Southville City, Dengkil, Selangor, 43800",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "hazri.aziz@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502469",
+      "name": "Heidi Binti Ahmad Sazali",
+      "address": "10,Jalan Serambi U8/29A,, Bukit Jelutong, Shah Alam, Selangor, 40150",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "heidi.sazali@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502087",
+      "name": "Khairul Helmi Bin Mohd Nudin",
+      "address": "No 22, Jalan Bukit Permata,, Taman Bukit Permata, Batu Caves, Selangor, 68100",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "helmi.nudin@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502408",
+      "name": "Mohamad Hilman Bin Mohamad Roslan",
+      "address": "32-2 Jalan Wp 3/3, Kota Warisan, Sepang, Selangor, 43900",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "hilman.roslan@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2108558",
+      "name": "Muhammad Hilmi Aiman Bin Che Suhaimi",
+      "address": "No.16, Jalan Rk 6/16, Rasah Kemayan, Rasah Kemayan, Seremban, Negeri Sembilan, 70300",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "hilmiaiman.chesuhaimi@malaysiaairlines.com",
+      "active": true
+    },
+    {
+      "staffNo": "2356770",
+      "name": "Mohd Hishamudin Bin Mohammed Suhaimee",
+      "address": "No 19, Jalan Bestari 2/1, Puncak Bestari, Puncak Bestari, Puncak Alam, Selangor, 42300",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "hishamudin.suhaimee@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502581",
+      "name": "Humayun Bin Mohd Hussein",
+      "address": "19,, Jln 4/12 P, Bandar Baru Bangi, Selangor, 43650",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "humayun.hussein@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502629",
+      "name": "Muhammad Ikhwan Bin Masri",
+      "address": "No 282, Jalan Ara Sendayan 1/8, Taman Ara Sendayan, Seremban, Negeri Sembilan, 70300",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "ikhwan.masri@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502573",
+      "name": "Mohd Ikmal Bin Ahmad",
+      "address": "No 1,, Jalan P11 F/19, Presint 11, Putrajaya, Wilayah Persekutuan Putrajaya, 62300",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "ikmal.ahmad@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502418",
+      "name": "Ikram Shahidi Bin Abdullah",
+      "address": "9 , Alam Birai U8/70,, Bukit Jelutong, Shah Alam, Selangor, 40150",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "ikram.abdullah@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2356595",
+      "name": "Muhammad Iman Khan Bin Mohd Nor Khan",
+      "address": "No.3, Jalan Setia Nusantara U13/19B, Setia Eco Park, Shah Alam, Selangor, 40170",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "imankhan.mohdnorkhan@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8501371",
+      "name": "Mohd Ismail Hamdi Bin Ku Shaari",
+      "address": "No 58 Jalan Puj 1/7, Taman Puncak Jalil, Bandar Putra Permai, Seri Kembangan, Selangor, 43300",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "hamdi.kushaari@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8500999",
+      "name": "Muhammad Izhan Bin Yusoff",
+      "address": "Lot 3772 Jalan Banjaran 10,, Kempas, Johor Bahru, Johor, 81200",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "izhan.yusoff@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2351772",
+      "name": "Mohd Izhan Fariz Bin Zailan",
+      "address": "Lot 1779, Jln Gajah 14, Kampung Kubu Gajah, Kampung Kubu Gajah, Sungai Buloh, Selangor, 47000",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "mohdizhanfariz.zailan@malaysiaairlines.com",
+      "active": true
+    },
+    {
+      "staffNo": "8502510",
+      "name": "Izhar Zulhisham Bin Ibrahim",
+      "address": "No 2A, Jalan Tiang Seri U8/73A,, Bukit Jelutong, Shah Alam, Selangor, 40150",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "izhar.ibrahim@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502395",
+      "name": "Shazrul Izran Bin Salehuddin",
+      "address": "03-09-03, Residensi Setiawangsa,, No. 20, Jln 1/56, Tmn Setiawangsa, Kuala Lumpur, Kuala Lumpur, 54200",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "shazrul.salehuddin@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502422",
+      "name": "Jayraj A/L Nadarajan",
+      "address": "No 1, Persiaran Tembok 16,, Taman Sri Desa, Ipoh, Perak, 30010",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "jayraj.nadarajan@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502413",
+      "name": "Choo Jianwei",
+      "address": "A-7-3A, Block A, Ceria Residence, Persiaran Sepang, Cyber 10, Cyberjaya, Selangor, 63000",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "jianwei.choo@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502498",
+      "name": "Wong Jing Han",
+      "address": "A-6-12, 2, Jalan Kolam Air,, Taman Desa Melawati, Kuala Lumpur, Kuala Lumpur, 53100",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "jinghan.wong@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502376",
+      "name": "Johan Ariff Bin Ismail",
+      "address": "Lot 3179,, Paya Jaras Hulu, Sungai Buloh, Selangor, 47000",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "johan.ismail@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8501980",
+      "name": "Kamaruzaman Bin Hussin",
+      "address": "No.27, Jln Pulau Angsa U1033F,, Bandar Nusa Rhu, Shah Alam, Selangor, 40170",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "kamaruzaman.hussin@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2357886",
+      "name": "Kang Chin Ming",
+      "address": "125 , Taman Laguna Mas ,, Jalan Alor Mengkudu, Alor Setar, Kedah, 05400",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "chinming.kang@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8500114",
+      "name": "Abdul Karim Bin Kallingal Mohamed",
+      "address": "No 28 Jalan Warisan Indah 8/10,, Kota Warisan, Sepang, Selangor, 43900",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "karim.kallingal@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8500377",
+      "name": "Md Kasim Bin Md Afandi",
+      "address": "No 4 Jalan Udang Solo 17/Ks03, Taman Teluk Gadong Kecil, Klang, Selangor, 41250",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "kassim.afandi@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502513",
+      "name": "Keith Jonathan Charles",
+      "address": "No 948 Pt 683 Jalan Nada Alam 5/1,, Taman Nada Alam,, Mantin, Negeri Sembilan, 71700",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "keith.charles@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502419",
+      "name": "Gan Kem Fuei",
+      "address": "53 , Jalan Aman Serenia 15/6, Bandar Serenia, Sepang, Selangor, 43900",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "kemfuei.gan@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358301",
+      "name": "Ahmad Khairi Bin Yahaya",
+      "address": "No 12, Jalan Nuri 2,, Setia Pearl Island, Bayan Lepas, Pulau Pinang, 11900",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "khairi.yahaya@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502399",
+      "name": "Muhammad Khairul Azizi Bin Mat Alias",
+      "address": "No 3,, Jalan Casuarina U17/63A, Elmina Green 1, Shah Alam, Selangor, 40160",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "azizi.alias@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358875",
+      "name": "Kishev Nair A/L Segaran Nair",
+      "address": "8, Jalan Pu 2/1B, Taman Puchong Utama,, Taman Puchong Utama, Shah Alam, Selangor, 47140",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "kishevnair.segarannair@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2361498",
+      "name": "Lester Shane Tey Wei Ming",
+      "address": "No. 26, Jalan Sumazau 1G/Ku5,, Bandar Bukit Raja, Klang, Selangor, 41050",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "lester.shane@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502497",
+      "name": "Mahesh Kumar A/L Nadarajan",
+      "address": "No 20A,Jalan Palma 5, Palma Sand, Gamuda Cove, Banting, Selangor, 42700",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "mahesh.nadarajan@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502182",
+      "name": "Michael Chai Yiin Kiong",
+      "address": "No 42, Jalan Setia Utama U13/37R, Setia Alam Seksyen U13, Shah Alam, Selangor, 40170",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "michael.chai@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2361796",
+      "name": "Lee Ming Yong",
+      "address": "109, Blok E, Makmur Apt,, Jalan Pjs 8/9, Petaling Jaya, Selangor, 46000",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "mingyong.lee@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502628",
+      "name": "Mior Nor Badrishah Bin Mohamad",
+      "address": "D13A-05, Changkat View Condominium, 18 Jln Dutamas Raya,, 18 Jln Dutamas Raya, Segambut, Kuala Lumpur, 51200",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "badrishah.mohamad@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8501841",
+      "name": "Mokhzani Bin Ibrahim",
+      "address": "B 10-03,Block B Radia Residence,, Persiaran Singahsana, Shah Alam, Selangor, 40150",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "mokhzani.ibrahim@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358873",
+      "name": "Muhammad Arash Bin Jamal",
+      "address": "A-3A-01, Shang Villa Condominium,, Ss7, Petaling, Selangor, 47301",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "arash.jamal@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8500189",
+      "name": "Mohammad Muzafar Bin Mohd Amir",
+      "address": "No 18 Jalan JH 5,, Taman Jenderam Harmoni, Dengkil, Selangor, 43800",
+      "remarks": "Resignation",
+      "rank": "Captain",
+      "fleet": "Fleet not recorded",
+      "nationality": "Malaysian",
+      "email": "muzafar.amir@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502397",
+      "name": "Mohamad Muzamil Bin Shafee",
+      "address": "No 5,, Jalan Aman Serenia 7/8, Shah Alam, Selangor, 43900",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "muzamil.shafee@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8500511",
+      "name": "Mohd Nadzari Bin Haron",
+      "address": "No.71 Jalan Darulaman Jaya,, Jalan Darulaman Jaya, Alor Setar, Kedah, 6000",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "nadzari.haron@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502623",
+      "name": "Mohd Nadzmi Syafiq Bin Mohd Nadzri",
+      "address": "No.6, Jalan Sl7,, Sejati Lakeside, Cyberjaya, Selangor, 63000",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "nadzmi.nadzri@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502560",
+      "name": "Nadzreen Haziq Bin Mohd Yazid",
+      "address": "34, Lorong Desa Flora 1/4,, Tmn Desa Flora, Senawang, Seremban, Negeri Sembilan, 70450",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "nadzreen.yazid@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502416",
+      "name": "Ahmed Naim Bin Azli",
+      "address": "50 Jln Dutamas Seroja 1,, Tmn Segambut Sppk, Kuala Lumpur, Kuala Lumpur, 51200",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "naim.azli@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502409",
+      "name": "Mohamad Naqqash Bin Mohamad Nasrudin",
+      "address": "No.7 Jalan Sl 2/2, Sejati Lakeside 2,Cyber 10, Cyberjaya, Selangor, 63000",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "naqqash.nasrudin@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358012",
+      "name": "Nasran Bin Ahmad Musahar",
+      "address": "198, Jalan 19, Taman Kuning Sari, Air Kuning, Taman Kuning Sari, Air Kuning, Taiping, Perak, 34000",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "nasran.musahar@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8000825",
+      "name": "Nawal Adam Bin Abd Ghaffar",
+      "address": "29 Jalan 2/1B,, Mutiara Bangi,  Bandar Baru Bangi, Bandar Baru Bangi, Selangor, 43650",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "nawaladam.abdulghaffar@malaysiaairlines.com",
+      "active": true
+    },
+    {
+      "staffNo": "8502495",
+      "name": "Nazar Fizri Bin Shaiful Yazan",
+      "address": "23, Jalan Metafasa U16/176,, Elmina West, Shah Alam, Selangor, 40160",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "nazar.shaiful@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2361493",
+      "name": "Tengku Muhd Nidzamuddin Bin Tengku Yahya",
+      "address": "F307, Jalan Matahari U5/117, Apartment Ruby,, Bandar Pinggiran Subang, Seksyen U5, Shah Alam, Selangor, 40150",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "nidzamuddin.yahya@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8501834",
+      "name": "Nik Azleen Bin Nik Hassan Shuhaimi",
+      "address": "No.6 U8/37 Jln Rabung, Bky Jelutong, Shah Alam, Bky Jelutong, Shah Alam, Shah Alam, Selangor, 40150",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "azleen.shuhaimi@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502179",
+      "name": "Norddin Bin Othman",
+      "address": "No 9, Jalan Melor 5H,, Desa Melor, Serendah, Selangor, 48200",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "norddin.othman@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2356596",
+      "name": "Nurhazelin Ain Aqilah Binti Norheizel Nizam Mahfuz",
+      "address": "No.8,, Jalan 3/5, Bangi Valley, Shah Alam, Selangor, 43650",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "nurhazelin.norheizel@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2361794",
+      "name": "Puteri Maisarah Athirah Binti Mior Nor Badrishah",
+      "address": "D13A05, Block D, Changkat View Condominium,, NO 18, Jalan Dutamas Raya, Kuala Lumpur, Kuala Lumpur, 51200",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "maisarah.badrishah@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2357881",
+      "name": "Abdul Qayyum Muhammad Ghazie",
+      "address": "Lot 36019 Jalan Seremban,, Kuala Pilah Lama, Seremban, Negeri Sembilan, 70400",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "qayyum.ghazie@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2351775",
+      "name": "Mohd Rahimi Bin Mamat",
+      "address": "No.37 Jalan Seri Buana 8, Taman Tangga Batu Perdana, Tanjung Kling, Melaka, 76400",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "mohdrahimi.mamat@malaysiaairlines.com",
+      "active": true
+    },
+    {
+      "staffNo": "2357988",
+      "name": "Rajendra Rao A/L Jairam",
+      "address": "No 7, Jalan Putra Indah, 9/2 Putra Heights, Subang Jaya, Selangor, 47650",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "rajendra.jairam@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502575",
+      "name": "Shahreil Rezza Bin Mohamed Shafi",
+      "address": "D-2-2,, Villa Wangsa Mas Condominium, Kuala Lumpur, Kuala Lumpur, 53300",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "rezza.shafi@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2352109",
+      "name": "Mohamad Rizqin Bin Mohamad Radzi",
+      "address": "No 26, Jalan Npt 7/1G,, Taman Nusaputra Timur, Sepang, Selangor, 47130",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "mohamadrizqin.mohamadradzi@malaysiaairlines.com",
+      "active": true
+    },
+    {
+      "staffNo": "8000790",
+      "name": "Mohd Rizuan Bin Jamaludin",
+      "address": "No. 3647, Lorong Inang 13/3, Taman Ria Jaya 3, Sungai Petani, Kedah, 08000",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "mohdrizuan.jamaludin@malaysiaairlines.com",
+      "active": true
+    },
+    {
+      "staffNo": "8501836",
+      "name": "Mohamad Roshaizu Bin Mohd Rozali",
+      "address": "No.12 Jalan Pandan 10/6, Pandan Jaya, Pandan Jaya, Kuala Lumpur, Kuala Lumpur, 55100",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "roshaizu.rozali@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502613",
+      "name": "Rosli Bin Hamzah",
+      "address": "No 17, Jalan Anggerik 11,, Saujana Utama 1, Sungai Buloh, Selangor, 47000",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "rosli.hamzah@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502569",
+      "name": "Mohd Saddam Bin Mahdzir",
+      "address": "A-09-06, Usj One Avenue,, Persiaran Subang Mewah, Subang Jaya, Selangor, 47600",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "saddam.mahdzir@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358866",
+      "name": "Mohamad Shahmi Bin Shukor",
+      "address": "No. 35 Jalan Ss 3/53, Kelana Jaya, Petaling Jaya, Selangor, 47300",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "shahmi.shukor@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8500579",
+      "name": "Shaiful Bahareen Bin Baharuddin",
+      "address": "21, Jalan Timah 7/25, Seksyen 7, Shah Alam, Selangor, 40000",
+      "remarks": "Secondment - DMF",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "shaiful.baharuddin@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502572",
+      "name": "Shara Azlin Binti Jalil",
+      "address": "A8-B7, Armanee Terrace,, Jalan Pju 8/1,Damansara Perdana, Shah Alam, Selangor, 47820",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "azlin.jalil@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502264",
+      "name": "Lee Shaun Quan Xiong",
+      "address": "Pt 462,, Jalan Pengkalan Chepa, Kota Bharu, Kelantan, 15400",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "quanxiong.leeshaun@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2361492",
+      "name": "Goh Shu Bin",
+      "address": "No 10,, Jalan Ss19/1B, Subang Jaya, Selangor, 47500",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "shubin.goh@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2361795",
+      "name": "Tan Shu Ning",
+      "address": "36, Jalan Othman 2/40,, Seksyen 4, Petaling Jaya, Selangor, 46000",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "shuning.tan@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2357985",
+      "name": "Stephen Sigar Salutan",
+      "address": "A-25-03, Aratre Residences,Block A,, Jalan PJU 1A/46, Pusat Perdagangan Dana 1,, Petaling jaya, Selangor, 47301",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "stephen.salutan@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502032",
+      "name": "Mohd Suhailin Bin Mohd Ramli",
+      "address": "No 13, Jln Pulau Lumut, U10/72,, Taman Alam Budiman, Shah Alam, Selangor, 40170",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "suhailin.ramli@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8501912",
+      "name": "Nor Suhardi Bin Abdul Rahman",
+      "address": "Emira Residence, E17-08, Jalan Akuatik A13/64A, Shah Alam, Selangor, 40100",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "suhardi.rahman@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358002",
+      "name": "Mohamad Syafiq Bin Mohamed Shariff",
+      "address": "No.146, Jalan Dayana 2/4, Dayana 2 , Nilai Impian, Nilai, Negeri Sembilan, 71800",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "syafiq.shariff@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502494",
+      "name": "Muhammad Syafiq Uzair Bin Mohd Saifuddin",
+      "address": "14 Jln P8A/5, Presint 8, Putrajaya, Wilayah Persekutuan Putrajaya, 62250",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "syafiq.saifuddin@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502571",
+      "name": "Nur Syafiqah Binti Bisnu",
+      "address": "D13-20,H2o Residence,, Jalan PJU 1A/3,Ara Damansara, Shah Alam, Selangor, 47301",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "syafiqah.bisnu@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8000390",
+      "name": "Syaharuan Bin Keman",
+      "address": "25,, Jalan Aman Serenia 2/5, Sepang, Selangor, 43900",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "syaharuan.keman@malaysiaairlines.com",
+      "active": true
+    },
+    {
+      "staffNo": "2357888",
+      "name": "Muhammad Syahir Bin Subri",
+      "address": "No 12, Jalan Cendana 2, Taman Salak Perdana, Sepang, Selangor, 43900",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "syahir.subri@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502650",
+      "name": "Syed Mohammad Hafeez Bin Syed Padzil",
+      "address": "A3a-17,Dpines Condo,, Jalan Pandan Bersih ,Taman Nirwana, Ampang, Selangor, 68000",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "hafeez.padzil@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2361497",
+      "name": "Syed Ibrahim Jamalullail Bin Syed Mahadzir",
+      "address": "76,, Jalan Sultan Salahuddin Abdul Aziz Shah  9/6, Shah Alam, Selangor, 40100",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "ibrahim.mahadzir@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2356597",
+      "name": "Syed Raziq Jamalaulil Bin Syed Razif Jamalaulil",
+      "address": "E-05-03, The Potpourri,Jalan PJU 1A/4,, Ara Damansara, Petaling Jaya, Selangor, 47301",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "syedraziq.syedrazif@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8501080",
+      "name": "Mohamed Tajuddin Bin Arsath Ali",
+      "address": "No 59 Jalan Suadamai 10/1B, Bandar Tun Hussein Onn, Batu 9 Cheras, Selangor, 43200",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "tajuddin.arsath@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502441",
+      "name": "Teoh Keah Yong",
+      "address": "9, Vila Puncak Desa,, Jalan Vila Puncak Desa 3, Kuala Lumpur, Kuala Lumpur, 57100",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "keahyong.teoh@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2357883",
+      "name": "Tevaneshwaran A/L Yogaswaran",
+      "address": "No  2, Jalan 1/4, Taman Seri Jaromas (ROSA), Jenjarom, Selangor, 42600",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "tevaneshwaran.yogaswaran@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502415",
+      "name": "Thayallan A/L Sadasivam",
+      "address": "No.16,, Jalan 21/154,Taman Bukit Anggerik, Kuala Lumpur, Kuala Lumpur, 56000",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "thayallan.sadasivam@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8500142",
+      "name": "Thirukumar A/L Velayutham",
+      "address": "Persada CV 4-28,, Jalan Nova U5/86A, Subang Bestari, Shah Alam, Selangor, 40150",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "thirukumar.velayutham@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358005",
+      "name": "Tsaqafy Bin Muhamad Nasir",
+      "address": "B-14-4 Seroja Hills,, Taman Seroja, Salak Tinggi, Selangor, 43900",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "tsaqafy.nasir@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502622",
+      "name": "Tan Tsze Tshien",
+      "address": "C-8-1,Lacosta Condominium,, Sunway South Quay, Shah Alam, Selangor, 47500",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "tszetshien.tan@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358006",
+      "name": "Umar 'Anas Bin Abd Halim",
+      "address": "42A, Jalan WP 2/3,, Kota Warisan, Sepang, Selangor, 43900",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "umar.abdhalim@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8500657",
+      "name": "Ung Sing Hoe",
+      "address": "26, Setia Utama 2,, Jln Setia Utama U13/37M, Setia Alam, Shah Alam, Selangor, 40170",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "singhoe.ung@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2358872",
+      "name": "Vivendran A/L Ravi @ Thiagu",
+      "address": "No 15, Jalan 1214,, Taman Sungai Merab, Bandar Baru Bangi, Selangor, 43650",
+      "remarks": "Active pilot profile",
+      "rank": "Second Officer",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "vivendran.ravithiagu@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2357984",
+      "name": "Wan Farhan Bin Wan Izani",
+      "address": "B3-02-03A, Kondominium Mirage, Jalan Mirage 3, Perdana Lakeview West Park, Cyberjaya, Selangor, 63000",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "farhan.izani@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2107830",
+      "name": "Wan Muzairul Bin Wan Mahazir",
+      "address": "Testing 1, Testing 1, Testing 1, Testing 1, 100001",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "wanmuzairul.wanmahazir@malaysiaairlines.com",
+      "active": true
+    },
+    {
+      "staffNo": "2358001",
+      "name": "Wan Syahmi Safwan Bin Wan Jamaludin",
+      "address": "8-2 Tangerine Suites,, Persiaran Sunsuria, Bandar Sunsuria, Sepang, Selangor, 43900",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "syahmi.jamaludin@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502574",
+      "name": "Yeow Jian How",
+      "address": "No.3,, Jalan H4, Taman Melawati, Kuala Lumpur, Kuala Lumpur, 53100",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "jianhow.yeow@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502406",
+      "name": "Tan Yong Jiat",
+      "address": "31, Jalan BU 7/8, Bandar Utama, Petaling Jaya, Selangor, 47800",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "yongjiat.tan@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8502031",
+      "name": "Zaki Uddin",
+      "address": "No. 3 Mezzo Residences, JLN Bait U8/1B,, Bukit Jelutong, Shah Alam, Selangor, 40150",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Pakistani",
+      "email": "zaki.uddin@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8501840",
+      "name": "Mohd Zami Afif Harriandy B. Suhaimi",
+      "address": "C-10-05 Lakeville Residence, Jalan Sibu, Taman Wahyu, Taman Wahyu, Kuala Lumpur, Kuala Lumpur, 68100",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "afif.suhaimi@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "2110513",
+      "name": "Mohd Zefrie Bin Mohd Jasbir Khan",
+      "address": "Pd 3-12-2 Maisson Ara Damansara,, Jln Pju 1A/3, Petaling Jaya, Selangor, 47300",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "mohdzefrie.mohdjasbirkhan@malaysiaairlines.com",
+      "active": true
+    },
+    {
+      "staffNo": "8502396",
+      "name": "Abdullah Zubair Bin Abdullah Sani",
+      "address": "Blok E6-4-5,, Desa Pandan, Kuala Lumpur, Kuala Lumpur, 55100",
+      "remarks": "Active pilot profile",
+      "rank": "Captain",
+      "fleet": "ATR72-500",
+      "nationality": "Malaysian",
+      "email": "zubair.sani@fireflyz.com.my",
+      "active": true
+    },
+    {
+      "staffNo": "8888887",
+      "name": "Zayvian Zefrie",
+      "address": "00-00 Maisson Condo, Ara Damansara, Petaling Jaya, Selangor, 47301",
+      "remarks": "Active pilot profile",
+      "rank": "First Officer",
+      "fleet": "B737-800",
+      "nationality": "Malaysian",
+      "email": "zayvian.zefrie@blackshark.com",
+      "active": true
+    }
+  ],
+  "selectedStaffNo": "8500369",
+  "activeResetApplied": true
+}</script>
+    <script>
+// Live date and time updater
+function updateLiveDateTime() {
+  const dtElem = document.getElementById("live-datetime");
+  if (!dtElem) return;
+  const now = new Date();
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+  dtElem.textContent = now.toLocaleString('en-US', options);
+}
+
+setInterval(updateLiveDateTime, 1000);
+updateLiveDateTime();
+const uploadInput = document.querySelector("#csv-upload");
+const searchInput = document.querySelector("#search-input");
+const statusFilter = document.querySelector("#status-filter");
+const fleetFilter = document.querySelector("#fleet-filter");
+const rankFilter = document.querySelector("#rank-filter");
+const sortFilter = document.querySelector("#sort-filter");
+const clearFiltersButton = document.querySelector("#clear-filters");
+const addProfileButton = document.querySelector("#add-profile");
+const exportCsvButton = document.querySelector("#export-csv");
+const summaryRow = document.querySelector("#summary-row");
+const profileList = document.querySelector("#profile-list");
+const profileDetails = document.querySelector("#profile-details");
+const visibleCount = document.querySelector("#visible-count");
+const embeddedProfilesScript = document.querySelector("#embedded-profiles");
+
+const STORAGE_KEY = "pilotProfileDashboard.profiles";
+const SELECTED_KEY = "pilotProfileDashboard.selectedStaffNo";
+const ACTIVE_RESET_KEY = "pilotProfileDashboard.activeResetApplied";
+
+let profiles = [];
+let selectedStaffNo = "";
+let isAddingProfile = false;
+let pendingImport = null;
+
+const FLEET_OPTIONS = ["ATR72-500", "B737-800"];
+const RANK_OPTIONS = ["Captain", "First Officer", "Second Officer"];
+const EXPORT_HEADERS = ["StaffNo", "Name", "Rank", "Fleet", "Status", "Address", "Email", "Nationality", "Remarks"];
+const SUMMARY_COUNTERS = [
+  { id: "total-count", count: () => profiles.length },
+  { id: "inactive-count", count: () => profiles.filter((profile) => !profile.active).length },
+  { id: "b737-active-captain-count", count: () => countProfiles({ active: true, fleet: isB737, rank: isCaptainRank }) },
+  { id: "b737-active-copilot-count", count: () => countProfiles({ active: true, fleet: isB737, rank: isCopilotRank }) },
+  { id: "atr72-active-captain-count", count: () => countProfiles({ active: true, fleet: isAtr72, rank: isCaptainRank }) },
+  { id: "atr72-active-copilot-count", count: () => countProfiles({ active: true, fleet: isAtr72, rank: isCopilotRank }) },
+  { id: "b737-inactive-captain-count", count: () => countProfiles({ active: false, fleet: isB737, rank: isCaptainRank }) },
+  { id: "b737-inactive-copilot-count", count: () => countProfiles({ active: false, fleet: isB737, rank: isCopilotRank }) },
+  { id: "atr72-inactive-captain-count", count: () => countProfiles({ active: false, fleet: isAtr72, rank: isCaptainRank }) },
+  { id: "atr72-inactive-copilot-count", count: () => countProfiles({ active: false, fleet: isAtr72, rank: isCopilotRank }) },
+].map((counter) => ({ ...counter, element: document.querySelector(`#${counter.id}`) }));
+
+uploadInput?.addEventListener("change", handleUpload);
+searchInput.addEventListener("input", render);
+statusFilter.addEventListener("change", render);
+fleetFilter.addEventListener("change", render);
+rankFilter.addEventListener("change", render);
+sortFilter.addEventListener("change", render);
+clearFiltersButton.addEventListener("click", clearFilters);
+addProfileButton.addEventListener("click", startNewProfile);
+exportCsvButton.addEventListener("click", exportProfilesCsv);
+summaryRow.addEventListener("click", handleSummaryClick);
+summaryRow.addEventListener("keydown", handleSummaryKeydown);
+profileDetails.addEventListener("click", handleDetailsClick);
+profileDetails.addEventListener("submit", handleProfileSave);
+
+restoreSavedProfiles();
+
+function handleUpload(event) {
+  const [file] = event.target.files;
+
+  if (!file) {
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      pendingImport = buildImportPreview(parseCsv(String(reader.result)), file.name);
+      renderImportPreview();
+    } catch (error) {
+      pendingImport = null;
+      profileDetails.className = "details-empty";
+      profileDetails.textContent = error.message;
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = "";
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let field = "";
+  let insideQuotes = false;
+
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i];
+    const next = text[i + 1];
+
+    if (char === '"' && insideQuotes && next === '"') {
+      field += '"';
+      i += 1;
+    } else if (char === '"') {
+      insideQuotes = !insideQuotes;
+    } else if (char === "," && !insideQuotes) {
+      row.push(field);
+      field = "";
+    } else if ((char === "\n" || char === "\r") && !insideQuotes) {
+      if (char === "\r" && next === "\n") {
+        i += 1;
+      }
+      row.push(field);
+      if (row.some((cell) => cell.trim() !== "")) {
+        rows.push(row);
+      }
+      row = [];
+      field = "";
+    } else {
+      field += char;
+    }
+  }
+
+  row.push(field);
+  if (row.some((cell) => cell.trim() !== "")) {
+    rows.push(row);
+  }
+
+  const headerIndex = rows.findIndex((csvRow) => csvRow.includes("StaffNo"));
+  if (headerIndex === -1) {
+    throw new Error("Could not find the StaffNo header in the CSV.");
+  }
+
+  const headers = rows[headerIndex].map(clean);
+  return rows.slice(headerIndex + 1).map((csvRow) =>
+    headers.reduce((record, header, index) => {
+      record[header] = clean(csvRow[index] || "");
+      return record;
+    }, {})
+  );
+}
+
+function normaliseRows(rows) {
+  return rows
+    .filter((row) => row.StaffNo || row.FirstName || row.LastName)
+    .filter((row) => !String(row.Rank || "").toLowerCase().includes("cabin crew"))
+    .map((row) => {
+      const fullName = [row.FirstName, row.LastName].filter(Boolean).join(" ").trim() || "Unnamed Pilot";
+      const address = [row.Address1, row.Address2, row.City, row.State, row.Postcode].filter(Boolean).join(", ");
+      const inactiveRemarks = [row.InactiveReason, row.InactiveRemarks].filter(Boolean).join(" - ");
+
+      return {
+        staffNo: row.StaffNo || row.Title || "Not available",
+        name: fullName,
+        address: address || "No address recorded",
+        remarks: inactiveRemarks || "Active pilot profile",
+        rank: row.Rank || "Rank not recorded",
+        fleet: row.Fleet || "Fleet not recorded",
+        nationality: row.Nationality || "Nationality not recorded",
+        email: row.email || "Email not recorded",
+        active: true,
+      };
+    });
+}
+
+function buildImportPreview(rows, fileName) {
+  const identifiableRows = rows.filter((row) => row.StaffNo || row.FirstName || row.LastName);
+  const cabinCrewRows = identifiableRows.filter((row) => String(row.Rank || "").toLowerCase().includes("cabin crew"));
+  const pilotRows = identifiableRows.filter((row) => !String(row.Rank || "").toLowerCase().includes("cabin crew"));
+  const inactiveRows = pilotRows.filter((row) => row.InactiveReason || row.InactiveRemarks);
+  const missingFleetRows = pilotRows.filter((row) => !row.Fleet);
+  const missingRankRows = pilotRows.filter((row) => !row.Rank);
+  const duplicateStaffNumbers = findDuplicateStaffNumbers(pilotRows);
+
+  return {
+    fileName,
+    profiles: normaliseRows(rows),
+    stats: {
+      totalRows: rows.length,
+      identifiableRows: identifiableRows.length,
+      pilotRows: pilotRows.length,
+      cabinCrewRows: cabinCrewRows.length,
+      skippedRows: rows.length - identifiableRows.length,
+      inactiveRows: inactiveRows.length,
+      missingFleetRows: missingFleetRows.length,
+      missingRankRows: missingRankRows.length,
+      duplicateStaffNumbers: duplicateStaffNumbers.length,
+    },
+    duplicateStaffNumbers,
+  };
+}
+
+function findDuplicateStaffNumbers(rows) {
+  const seen = new Set();
+  const duplicates = new Set();
+
+  rows.forEach((row) => {
+    const staffNo = clean(row.StaffNo);
+    if (!staffNo) {
+      return;
+    }
+
+    if (seen.has(staffNo)) {
+      duplicates.add(staffNo);
+    }
+    seen.add(staffNo);
+  });
+
+  return Array.from(duplicates);
+}
+
+function render() {
+  pendingImport = null;
+  isAddingProfile = false;
+  updateCounters();
+
+  const filtered = getFilteredProfiles();
+  visibleCount.textContent = `${filtered.length} shown`;
+  profileList.innerHTML = "";
+
+  filtered.forEach((profile) => {
+    const card = document.createElement("button");
+    card.className = "profile-card";
+    card.type = "button";
+    card.setAttribute("aria-selected", String(profile.staffNo === selectedStaffNo));
+    card.addEventListener("click", () => {
+      selectedStaffNo = profile.staffNo;
+      render();
+    });
+
+    card.innerHTML = `
+      <span class="avatar">${initials(profile.name)}</span>
+      <span>
+        <h3>${escapeHtml(profile.name)}</h3>
+        <p class="profile-meta">${escapeHtml(profile.staffNo)} | ${escapeHtml(profile.rank)} | ${escapeHtml(profile.fleet)}</p>
+        <p class="profile-address">${escapeHtml(profile.address)}</p>
+      </span>
+      <span class="badge ${profile.active ? "" : "inactive"}">${profile.active ? "Active" : "Inactive"}</span>
+    `;
+
+    profileList.appendChild(card);
+  });
+
+  const selected = filtered.find((profile) => profile.staffNo === selectedStaffNo) || filtered[0];
+  renderDetails(selected);
+}
+
+function renderImportPreview() {
+  if (!pendingImport) {
+    return;
+  }
+
+  const { stats } = pendingImport;
+  const previewProfiles = pendingImport.profiles.slice(0, 5);
+  profileDetails.className = "detail-card import-preview";
+  profileDetails.innerHTML = `
+    <div>
+      <p class="eyebrow">CSV Preview</p>
+      <h3>${escapeHtml(pendingImport.fileName)}</h3>
+      <p class="profile-meta">Review the import before replacing the current dashboard data.</p>
+    </div>
+
+    <div class="import-stats">
+      ${importStat("Rows read", stats.totalRows)}
+      ${importStat("Pilot profiles", stats.pilotRows)}
+      ${importStat("Cabin crew removed", stats.cabinCrewRows)}
+      ${importStat("Blank rows skipped", stats.skippedRows)}
+      ${importStat("Inactive records found", stats.inactiveRows)}
+      ${importStat("Missing fleet", stats.missingFleetRows)}
+      ${importStat("Missing rank", stats.missingRankRows)}
+      ${importStat("Duplicate staff no.", stats.duplicateStaffNumbers)}
+    </div>
+
+    ${renderDuplicateNotice(pendingImport.duplicateStaffNumbers)}
+
+    <div>
+      <h3>Sample profiles</h3>
+      <div class="import-sample-list">
+        ${previewProfiles.map(renderImportSample).join("") || '<p class="profile-meta">No pilot profiles found in this file.</p>'}
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="save-button" type="button" data-action="apply-import">Apply import</button>
+      <button class="cancel-button" type="button" data-action="cancel-import">Cancel</button>
+    </div>
+  `;
+}
+
+function importStat(label, value) {
+  return `
+    <article>
+      <span>${escapeHtml(value)}</span>
+      <p>${escapeHtml(label)}</p>
+    </article>
+  `;
+}
+
+function renderDuplicateNotice(duplicateStaffNumbers) {
+  if (!duplicateStaffNumbers.length) {
+    return "";
+  }
+
+  return `
+    <p class="notice">
+      Duplicate staff numbers found: ${escapeHtml(duplicateStaffNumbers.slice(0, 8).join(", "))}
+      ${duplicateStaffNumbers.length > 8 ? "..." : ""}
+    </p>
+  `;
+}
+
+function renderImportSample(profile) {
+  return `
+    <article>
+      <span class="avatar">${initials(profile.name)}</span>
+      <span>
+        <h3>${escapeHtml(profile.name)}</h3>
+        <p class="profile-meta">${escapeHtml(profile.staffNo)} | ${escapeHtml(profile.rank)} | ${escapeHtml(profile.fleet)}</p>
+      </span>
+    </article>
+  `;
+}
+
+function getFilteredProfiles() {
+  const query = searchInput.value.trim().toLowerCase();
+  const status = statusFilter.value;
+  const fleet = fleetFilter.value;
+  const rank = rankFilter.value;
+  const sortBy = sortFilter.value;
+
+  return profiles
+    .filter((profile) => {
+      const matchesStatus =
+        status === "all" || (status === "active" && profile.active) || (status === "inactive" && !profile.active);
+      const matchesFleet =
+        fleet === "all" || (fleet === "b737" && isB737(profile.fleet)) || (fleet === "atr72" && isAtr72(profile.fleet));
+      const matchesRank = rank === "all" || matchesRankFilter(profile.rank, rank);
+      const searchable = [profile.name, profile.staffNo, profile.rank, profile.fleet, profile.address, profile.remarks]
+        .join(" ")
+        .toLowerCase();
+      return matchesStatus && matchesFleet && matchesRank && (!query || searchable.includes(query));
+    })
+    .sort((firstProfile, secondProfile) => compareProfiles(firstProfile, secondProfile, sortBy));
+}
+
+function updateCounters() {
+  SUMMARY_COUNTERS.forEach((counter) => {
+    if (counter.element) {
+      counter.element.textContent = counter.count();
+    }
+  });
+}
+
+function countProfiles({ active, fleet, rank }) {
+  return profiles.filter((profile) => profile.active === active && fleet(profile.fleet) && rank(profile.rank)).length;
+}
+
+function isB737(fleet) {
+  const normalisedFleet = String(fleet).toLowerCase();
+  return !normalisedFleet.includes(",") && normalisedFleet.includes("737");
+}
+
+function isAtr72(fleet) {
+  const normalisedFleet = String(fleet).toLowerCase();
+  return !normalisedFleet.includes(",") && normalisedFleet.includes("atr72");
+}
+
+function isCaptainRank(rank) {
+  return String(rank).toLowerCase().includes("captain");
+}
+
+function isCopilotRank(rank) {
+  const normalisedRank = String(rank).toLowerCase().replaceAll("-", " ");
+  return (
+    normalisedRank.includes("first officer") ||
+    normalisedRank.includes("second officer") ||
+    normalisedRank.includes("co pilot") ||
+    normalisedRank.includes("copilot")
+  );
+}
+
+function matchesRankFilter(rank, filter) {
+  const normalisedRank = String(rank).toLowerCase().replaceAll("-", " ");
+
+  if (filter === "captain") {
+    return isCaptainRank(rank);
+  }
+
+  if (filter === "copilot") {
+    return isCopilotRank(rank);
+  }
+
+  if (filter === "first-officer") {
+    return normalisedRank.includes("first officer");
+  }
+
+  if (filter === "second-officer") {
+    return normalisedRank.includes("second officer");
+  }
+
+  return true;
+}
+
+function compareProfiles(firstProfile, secondProfile, sortBy) {
+  return String(firstProfile[sortBy] || "").localeCompare(String(secondProfile[sortBy] || ""), undefined, {
+    numeric: true,
+    sensitivity: "base",
+  });
+}
+
+function clearFilters() {
+  searchInput.value = "";
+  statusFilter.value = "all";
+  fleetFilter.value = "all";
+  rankFilter.value = "all";
+  sortFilter.value = "name";
+  render();
+}
+
+function handleSummaryClick(event) {
+  const summaryCard = event.target.closest("[data-status]");
+  if (!summaryCard) {
+    return;
+  }
+
+  applySummaryFilter(summaryCard);
+}
+
+function handleSummaryKeydown(event) {
+  if (event.key !== "Enter" && event.key !== " ") {
+    return;
+  }
+
+  const summaryCard = event.target.closest("[data-status]");
+  if (!summaryCard) {
+    return;
+  }
+
+  event.preventDefault();
+  applySummaryFilter(summaryCard);
+}
+
+function applySummaryFilter(summaryCard) {
+  searchInput.value = "";
+  statusFilter.value = summaryCard.dataset.status || "all";
+  fleetFilter.value = summaryCard.dataset.fleet || "all";
+  rankFilter.value = summaryCard.dataset.rank || "all";
+  render();
+}
+
+function startNewProfile() {
+  isAddingProfile = true;
+  selectedStaffNo = "";
+  renderEditForm(createBlankProfile(), true);
+}
+
+function createBlankProfile() {
+  return {
+    staffNo: "",
+    name: "",
+    address: "",
+    remarks: "Active pilot profile",
+    rank: "First Officer",
+    fleet: "B737-800",
+    nationality: "",
+    email: "",
+    active: true,
+  };
+}
+
+function fleetOption(value, selectedFleet) {
+  const selected = value === selectedFleet ? "selected" : "";
+  return `<option value="${escapeAttribute(value)}" ${selected}>${escapeHtml(value)}</option>`;
+}
+
+function rankOption(value, selectedRank) {
+  const selected = value === selectedRank ? "selected" : "";
+  return `<option value="${escapeAttribute(value)}" ${selected}>${escapeHtml(value)}</option>`;
+}
+
+function renderDetails(profile) {
+  if (!profile) {
+    profileDetails.className = "details-empty";
+    profileDetails.textContent = profiles.length ? "No profile matches the current filter." : "Select a profile to view details.";
+    return;
+  }
+
+  profileDetails.className = "detail-card";
+  profileDetails.innerHTML = `
+    <div class="detail-head">
+      <span class="avatar">${initials(profile.name)}</span>
+      <div>
+        <h3>${escapeHtml(profile.name)}</h3>
+        <p class="profile-meta">${escapeHtml(profile.rank)} | ${escapeHtml(profile.fleet)}</p>
+      </div>
+    </div>
+    <div class="profile-actions">
+      <button class="edit-button" type="button" data-action="edit">Edit profile</button>
+      <button class="toggle-status-button" type="button" data-action="toggle-status">
+        Mark ${profile.active ? "Inactive" : "Active"}
+      </button>
+      <button class="delete-profile-button" type="button" data-action="delete-profile">Delete profile</button>
+    </div>
+    <dl class="detail-list">
+      <div>
+        <dt>Staff Number</dt>
+        <dd>${escapeHtml(profile.staffNo)}</dd>
+      </div>
+      <div>
+        <dt>Address</dt>
+        <dd>${escapeHtml(profile.address)}</dd>
+      </div>
+      <div>
+        <dt>Email</dt>
+        <dd>${escapeHtml(profile.email)}</dd>
+      </div>
+      <div>
+        <dt>Nationality</dt>
+        <dd>${escapeHtml(profile.nationality)}</dd>
+      </div>
+      <div>
+        <dt>Remarks</dt>
+        <dd class="${profile.active ? "" : "notice"}">${escapeHtml(profile.remarks)}</dd>
+      </div>
+    </dl>
+  `;
+}
+
+function renderEditForm(profile, isNewProfile = false) {
+  profileDetails.className = "detail-card";
+  profileDetails.innerHTML = `
+    <form class="edit-form" id="edit-profile-form">
+      <div class="detail-head">
+        <span class="avatar">${initials(profile.name)}</span>
+        <div>
+          <h3>${isNewProfile ? "Add pilot profile" : "Edit profile"}</h3>
+          <p class="profile-meta">${isNewProfile ? "New pilot" : escapeHtml(profile.staffNo)}</p>
+        </div>
+      </div>
+
+      <label>
+        Name
+        <input name="name" value="${escapeAttribute(profile.name)}" required />
+      </label>
+
+      <label>
+        Staff Number
+        <input name="staffNo" value="${escapeAttribute(profile.staffNo)}" required />
+      </label>
+
+      <label>
+        Rank
+        <select name="rank">
+          ${RANK_OPTIONS.map((rank) => rankOption(rank, profile.rank)).join("")}
+        </select>
+      </label>
+
+      <label>
+        Fleet
+        <select name="fleet">
+          ${FLEET_OPTIONS.map((fleet) => fleetOption(fleet, profile.fleet)).join("")}
+        </select>
+      </label>
+
+      <label>
+        Address
+        <textarea name="address" rows="3">${escapeHtml(profile.address)}</textarea>
+      </label>
+
+      <label>
+        Email
+        <input name="email" type="email" value="${escapeAttribute(profile.email)}" />
+      </label>
+
+      <label>
+        Nationality
+        <input name="nationality" value="${escapeAttribute(profile.nationality)}" />
+      </label>
+
+      <label>
+        Remarks
+        <textarea name="remarks" rows="3">${escapeHtml(profile.remarks)}</textarea>
+      </label>
+
+      <label>
+        Status
+        <select name="active">
+          <option value="true" ${profile.active ? "selected" : ""}>Active</option>
+          <option value="false" ${profile.active ? "" : "selected"}>Inactive</option>
+        </select>
+      </label>
+
+      <div class="form-actions">
+        <button class="save-button" type="submit">${isNewProfile ? "Add pilot" : "Save changes"}</button>
+        <button class="cancel-button" type="button" data-action="cancel">Cancel</button>
+      </div>
+    </form>
+  `;
+}
+
+async function handleDetailsClick(event) {
+  const actionButton = event.target.closest("[data-action]");
+  if (!actionButton) {
+    return;
+  }
+
+  if (actionButton.dataset.action === "apply-import") {
+    await applyPendingImport();
+    return;
+  }
+
+  if (actionButton.dataset.action === "cancel-import") {
+    pendingImport = null;
+    render();
+    return;
+  }
+
+  if (actionButton.dataset.action === "cancel") {
+    render();
+    return;
+  }
+
+  const selected = profiles.find((profile) => profile.staffNo === selectedStaffNo);
+  if (!selected) {
+    return;
+  }
+
+  if (actionButton.dataset.action === "edit") {
+    renderEditForm(selected);
+  }
+
+  if (actionButton.dataset.action === "delete-profile") {
+    deleteSelectedProfile(selected);
+  }
+
+  if (actionButton.dataset.action === "toggle-status") {
+    toggleSelectedProfileStatus(selected);
+  }
+
+}
+
+async function applyPendingImport() {
+  if (!pendingImport) {
+    return;
+  }
+
+  try {
+    profiles = pendingImport.profiles;
+    selectedStaffNo = profiles[0]?.staffNo || "";
+    console.log("Applying import with", profiles.length, "profiles");
+    pendingImport = null;
+    await saveProfiles();
+    console.log("Import applied and saved");
+    alert(`Successfully imported ${profiles.length} profiles!`);
+    render();
+  } catch (error) {
+    console.error("Error applying import:", error);
+    alert(`Error: ${error.message}`);
+    pendingImport = { profiles: profiles };
+  }
+}
+
+function exportProfilesCsv() {
+  if (!profiles.length) {
+    window.alert("No pilot profiles to export.");
+    return;
+  }
+
+  const rows = profiles.map((profile) => [
+    profile.staffNo,
+    profile.name,
+    profile.rank,
+    profile.fleet,
+    profile.active ? "Active" : "Inactive",
+    profile.address,
+    profile.email,
+    profile.nationality,
+    profile.remarks,
+  ]);
+  const csv = [EXPORT_HEADERS, ...rows].map((row) => row.map(csvCell).join(",")).join("\n");
+  const blob = new Blob([`\uFEFF${csv}`], { type: "text/csv;charset=utf-8" });
+  const downloadLink = document.createElement("a");
+
+  downloadLink.href = URL.createObjectURL(blob);
+  downloadLink.download = `pilot-profiles-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+  downloadLink.remove();
+  URL.revokeObjectURL(downloadLink.href);
+}
+
+function csvCell(value) {
+  return `"${String(value || "").replaceAll('"', '""')}"`;
+}
+
+function toggleSelectedProfileStatus(profile) {
+  const selectedIndex = profiles.findIndex((savedProfile) => savedProfile.staffNo === profile.staffNo);
+  if (selectedIndex === -1) {
+    return;
+  }
+
+  profiles[selectedIndex] = {
+    ...profiles[selectedIndex],
+    active: !profiles[selectedIndex].active,
+    remarks: profiles[selectedIndex].active ? profiles[selectedIndex].remarks : "Active pilot profile",
+  };
+  saveProfiles();
+  render();
+}
+
+function deleteSelectedProfile(profile) {
+  const shouldDelete = window.confirm(`Delete ${profile.name} from the dashboard?`);
+  if (!shouldDelete) {
+    return;
+  }
+
+  profiles = profiles.filter((savedProfile) => savedProfile.staffNo !== profile.staffNo);
+  selectedStaffNo = profiles[0]?.staffNo || "";
+  saveProfiles();
+  render();
+}
+
+function handleProfileSave(event) {
+  if (event.target.id !== "edit-profile-form") {
+    return;
+  }
+
+  event.preventDefault();
+
+  const form = new FormData(event.target);
+  const selectedIndex = profiles.findIndex((profile) => profile.staffNo === selectedStaffNo);
+  const staffNo = clean(form.get("staffNo"));
+
+  if (!staffNo) {
+    window.alert("Staff Number is required.");
+    return;
+  }
+
+  if (profiles.some((profile, index) => profile.staffNo === staffNo && (isAddingProfile || index !== selectedIndex))) {
+    window.alert("A pilot with this staff number already exists.");
+    return;
+  }
+
+  if (!isAddingProfile && selectedIndex === -1) {
+    return;
+  }
+
+  const updatedProfile = {
+    ...(isAddingProfile ? createBlankProfile() : profiles[selectedIndex]),
+    name: clean(form.get("name")),
+    staffNo,
+    rank: clean(form.get("rank")) || "Rank not recorded",
+    fleet: clean(form.get("fleet")) || "Fleet not recorded",
+    address: clean(form.get("address")) || "No address recorded",
+    email: clean(form.get("email")) || "Email not recorded",
+    nationality: clean(form.get("nationality")) || "Nationality not recorded",
+    remarks: clean(form.get("remarks")) || "No remarks recorded",
+    active: form.get("active") === "true",
+  };
+
+  if (isAddingProfile) {
+    profiles.push(updatedProfile);
+    isAddingProfile = false;
+  } else {
+    profiles[selectedIndex] = updatedProfile;
+  }
+
+  selectedStaffNo = updatedProfile.staffNo;
+  saveProfiles();
+  render();
+}
+
+function restoreSavedProfiles() {
+  try {
+    const savedProfiles = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    if (Array.isArray(savedProfiles)) {
+      profiles = savedProfiles;
+      selectedStaffNo = localStorage.getItem(SELECTED_KEY) || (profiles[0]?.staffNo || "");
+    }
+  } catch (error) {
+    console.error('Failed to restore profiles:', error);
+    profiles = [];
+    selectedStaffNo = "";
+  }
+
+  if (!profiles.length) {
+    const embeddedState = readEmbeddedProfilesState();
+    if (embeddedState) {
+      profiles = embeddedState.profiles;
+      selectedStaffNo = localStorage.getItem(SELECTED_KEY) || embeddedState.selectedStaffNo;
+    }
+  }
+
+  render();
+}
+
+function readEmbeddedProfilesState() {
+  const rawState = embeddedProfilesScript?.textContent?.trim();
+
+  if (!rawState) {
+    return null;
+  }
+
+  try {
+    const parsedState = JSON.parse(rawState);
+
+    if (Array.isArray(parsedState)) {
+      return {
+        profiles: parsedState,
+        selectedStaffNo: parsedState[0]?.staffNo || "",
+      };
+    }
+
+    if (!Array.isArray(parsedState.profiles)) {
+      return null;
+    }
+
+    return {
+      profiles: parsedState.profiles,
+      selectedStaffNo: parsedState.selectedStaffNo || parsedState.profiles[0]?.staffNo || "",
+    };
+  } catch (error) {
+    console.error("Failed to parse embedded profiles:", error);
+    return null;
+  }
+}
+
+function saveProfiles() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(profiles));
+  localStorage.setItem(SELECTED_KEY, selectedStaffNo);
+  return true;
+}
+
+function clearSavedProfiles() {
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(SELECTED_KEY);
+  localStorage.removeItem(ACTIVE_RESET_KEY);
+}
+
+function initials(name) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() || "")
+    .join("");
+}
+
+function clean(value) {
+  return String(value || "").replace(/^\uFEFF/, "").trim();
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function escapeAttribute(value) {
+  return escapeHtml(value);
+}
+    </script>
   </body>
 </html>
