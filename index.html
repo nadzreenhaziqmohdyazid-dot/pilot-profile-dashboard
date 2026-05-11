@@ -265,6 +265,28 @@ h3 {
     var(--surface);
 }
 
+.summary-fleet {
+  border-top-color: var(--blue);
+  background:
+    linear-gradient(180deg, rgba(223, 242, 250, 0.88), rgba(255, 255, 255, 0.96)),
+    var(--surface);
+}
+
+.summary-fleet span {
+  color: var(--blue);
+}
+
+.summary-management {
+  border-top-color: var(--gold);
+  background:
+    linear-gradient(180deg, rgba(255, 244, 206, 0.92), rgba(255, 255, 255, 0.96)),
+    var(--surface);
+}
+
+.summary-management span {
+  color: var(--accent-dark);
+}
+
 .summary-inactive {
   border-top-color: var(--warn);
   background:
@@ -1017,6 +1039,34 @@ h3 {
         <article class="summary-total" data-status="all" data-fleet="all" data-rank="all" tabindex="0">
           <span id="total-count">0</span>
           <p>Total pilots</p>
+        </article>
+        <article class="summary-management">
+          <span id="management-count">0</span>
+          <p>Management pilots</p>
+        </article>
+        <article class="summary-fleet">
+          <span id="b737-total-count">0</span>
+          <p>Total B737 pilots</p>
+        </article>
+        <article class="summary-fleet">
+          <span id="atr72-total-count">0</span>
+          <p>Total ATR72 pilots</p>
+        </article>
+        <article class="summary-active">
+          <span id="b737-captain-count">0</span>
+          <p>Total B737 Captains</p>
+        </article>
+        <article class="summary-active">
+          <span id="b737-fo-count">0</span>
+          <p>Total B737 FOs</p>
+        </article>
+        <article class="summary-active">
+          <span id="atr72-captain-count">0</span>
+          <p>Total ATR72 Captains</p>
+        </article>
+        <article class="summary-active">
+          <span id="atr72-fo-count">0</span>
+          <p>Total ATR72 FOs</p>
         </article>
         <article class="summary-inactive" data-status="inactive" data-fleet="all" data-rank="all" tabindex="0">
           <span id="inactive-count">0</span>
@@ -3088,9 +3138,16 @@ let isMobileDrawerOpen = false;
 
 const FLEET_OPTIONS = ["ATR72-500", "B737-800"];
 const RANK_OPTIONS = ["Captain", "First Officer", "Second Officer"];
-const EXPORT_HEADERS = ["StaffNo", "Name", "Rank", "Fleet", "Status", "Address", "Email", "Nationality", "Remarks"];
+const EXPORT_HEADERS = ["StaffNo", "Name", "Rank", "Fleet", "Status", "Management", "Address", "Email", "Nationality", "Remarks"];
 const SUMMARY_COUNTERS = [
   { id: "total-count", count: () => profiles.length },
+  { id: "management-count", count: () => profiles.filter((profile) => isManagementPilot(profile)).length },
+  { id: "b737-total-count", count: () => profiles.filter((profile) => isB737(profile.fleet)).length },
+  { id: "atr72-total-count", count: () => profiles.filter((profile) => isAtr72(profile.fleet)).length },
+  { id: "b737-captain-count", count: () => profiles.filter((profile) => isB737(profile.fleet) && isCaptainRank(profile.rank)).length },
+  { id: "b737-fo-count", count: () => profiles.filter((profile) => isB737(profile.fleet) && isCopilotRank(profile.rank)).length },
+  { id: "atr72-captain-count", count: () => profiles.filter((profile) => isAtr72(profile.fleet) && isCaptainRank(profile.rank)).length },
+  { id: "atr72-fo-count", count: () => profiles.filter((profile) => isAtr72(profile.fleet) && isCopilotRank(profile.rank)).length },
   { id: "inactive-count", count: () => profiles.filter((profile) => !profile.active).length },
   { id: "b737-active-captain-count", count: () => countProfiles({ active: true, fleet: isB737, rank: isCaptainRank }) },
   { id: "b737-active-copilot-count", count: () => countProfiles({ active: true, fleet: isB737, rank: isCopilotRank }) },
@@ -3243,21 +3300,23 @@ function normaliseRows(rows) {
     .filter((row) => row.StaffNo || row.FirstName || row.LastName)
     .filter((row) => !String(row.Rank || "").toLowerCase().includes("cabin crew"))
     .map((row) => {
-      const fullName = [row.FirstName, row.LastName].filter(Boolean).join(" ").trim() || "Unnamed Pilot";
-      const address = [row.Address1, row.Address2, row.City, row.State, row.Postcode].filter(Boolean).join(", ");
+      const fullName = clean(row.Name) || [row.FirstName, row.LastName].filter(Boolean).join(" ").trim() || "Unnamed Pilot";
+      const address = clean(row.Address) || [row.Address1, row.Address2, row.City, row.State, row.Postcode].filter(Boolean).join(", ");
       const inactiveRemarks = [row.InactiveReason, row.InactiveRemarks].filter(Boolean).join(" - ");
+      const remarks = clean(row.Remarks) || inactiveRemarks || "Active pilot profile";
 
-      return {
+      return normaliseProfileRecord({
         staffNo: row.StaffNo || row.Title || "Not available",
         name: fullName,
         address: address || "No address recorded",
-        remarks: inactiveRemarks || "Active pilot profile",
+        remarks,
         rank: row.Rank || "Rank not recorded",
         fleet: row.Fleet || "Fleet not recorded",
         nationality: row.Nationality || "Nationality not recorded",
-        email: row.email || "Email not recorded",
-        active: true,
-      };
+        email: row.Email || row.email || "Email not recorded",
+        active: row.Status ? String(row.Status).toLowerCase() === "active" : true,
+        management: parseManagementValue(row.Management, remarks),
+      });
     });
 }
 
@@ -3517,6 +3576,38 @@ function compareProfiles(firstProfile, secondProfile, sortBy) {
   });
 }
 
+function inferManagementFromRemarks(remarks) {
+  return /(chief pilot|director|manager\b|management\b)/i.test(String(remarks || ""));
+}
+
+function parseManagementValue(value, remarks = "") {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  const normalisedValue = String(value || "").trim().toLowerCase();
+  if (["true", "yes", "y", "management", "manager"].includes(normalisedValue)) {
+    return true;
+  }
+
+  if (["false", "no", "n", "non-management", "non management"].includes(normalisedValue)) {
+    return false;
+  }
+
+  return inferManagementFromRemarks(remarks);
+}
+
+function normaliseProfileRecord(profile) {
+  return {
+    ...profile,
+    management: parseManagementValue(profile.management, profile.remarks),
+  };
+}
+
+function isManagementPilot(profile) {
+  return Boolean(profile?.management);
+}
+
 function clearFilters() {
   searchInput.value = "";
   statusFilter.value = "all";
@@ -3575,6 +3666,7 @@ function createBlankProfile() {
     fleet: "B737-800",
     nationality: "",
     email: "",
+    management: false,
     active: true,
   };
 }
@@ -3616,6 +3708,10 @@ function renderDetails(profile) {
       <div>
         <dt>Staff Number</dt>
         <dd>${escapeHtml(profile.staffNo)}</dd>
+      </div>
+      <div>
+        <dt>Management</dt>
+        <dd>${isManagementPilot(profile) ? "Yes" : "No"}</dd>
       </div>
       <div>
         <dt>Address</dt>
@@ -3686,6 +3782,14 @@ function renderEditForm(profile, isNewProfile = false) {
       <label>
         Nationality
         <input name="nationality" value="${escapeAttribute(profile.nationality)}" />
+      </label>
+
+      <label>
+        Management
+        <select name="management">
+          <option value="false" ${isManagementPilot(profile) ? "" : "selected"}>No</option>
+          <option value="true" ${isManagementPilot(profile) ? "selected" : ""}>Yes</option>
+        </select>
       </label>
 
       <label>
@@ -3783,6 +3887,7 @@ function exportProfilesCsv() {
     profile.rank,
     profile.fleet,
     profile.active ? "Active" : "Inactive",
+    isManagementPilot(profile) ? "Yes" : "No",
     profile.address,
     profile.email,
     profile.nationality,
@@ -3866,14 +3971,15 @@ function handleProfileSave(event) {
     email: clean(form.get("email")) || "Email not recorded",
     nationality: clean(form.get("nationality")) || "Nationality not recorded",
     remarks: clean(form.get("remarks")) || "No remarks recorded",
+    management: form.get("management") === "true",
     active: form.get("active") === "true",
   };
 
   if (isAddingProfile) {
-    profiles.push(updatedProfile);
+    profiles.push(normaliseProfileRecord(updatedProfile));
     isAddingProfile = false;
   } else {
-    profiles[selectedIndex] = updatedProfile;
+    profiles[selectedIndex] = normaliseProfileRecord(updatedProfile);
   }
 
   selectedStaffNo = updatedProfile.staffNo;
@@ -3885,7 +3991,7 @@ function restoreSavedProfiles() {
   try {
     const savedProfiles = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
     if (Array.isArray(savedProfiles)) {
-      profiles = savedProfiles;
+      profiles = savedProfiles.map(normaliseProfileRecord);
       selectedStaffNo = localStorage.getItem(SELECTED_KEY) || (profiles[0]?.staffNo || "");
     }
   } catch (error) {
@@ -3897,7 +4003,7 @@ function restoreSavedProfiles() {
   if (!profiles.length) {
     const embeddedState = readEmbeddedProfilesState();
     if (embeddedState) {
-      profiles = embeddedState.profiles;
+      profiles = embeddedState.profiles.map(normaliseProfileRecord);
       selectedStaffNo = localStorage.getItem(SELECTED_KEY) || embeddedState.selectedStaffNo;
     }
   }
