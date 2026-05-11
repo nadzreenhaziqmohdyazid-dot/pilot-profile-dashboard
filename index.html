@@ -492,6 +492,11 @@ h3 {
   background: var(--warn-soft);
 }
 
+.badge.hidden {
+  color: var(--blue);
+  background: var(--blue-soft);
+}
+
 .details-panel {
   position: sticky;
   top: 18px;
@@ -1163,6 +1168,15 @@ h3 {
             <option value="all">All</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
+          </select>
+        </label>
+
+        <label>
+          Visibility
+          <select id="visibility-filter">
+            <option value="visible">Visible on dashboard</option>
+            <option value="hidden">Hidden from dashboard</option>
+            <option value="all">All records</option>
           </select>
         </label>
 
@@ -3157,6 +3171,7 @@ updateLiveDateTime();
 const uploadInput = document.querySelector("#csv-upload");
 const searchInput = document.querySelector("#search-input");
 const statusFilter = document.querySelector("#status-filter");
+const visibilityFilter = document.querySelector("#visibility-filter");
 const fleetFilter = document.querySelector("#fleet-filter");
 const rankFilter = document.querySelector("#rank-filter");
 const sortFilter = document.querySelector("#sort-filter");
@@ -3186,9 +3201,9 @@ let activeSummaryId = "";
 
 const FLEET_OPTIONS = ["ATR72-500", "B737-800"];
 const RANK_OPTIONS = ["Captain", "First Officer", "Second Officer"];
-const EXPORT_HEADERS = ["StaffNo", "Name", "Rank", "Fleet", "Status", "Management", "Address", "Email", "Nationality", "Remarks"];
+const EXPORT_HEADERS = ["StaffNo", "Name", "Rank", "Fleet", "Status", "HiddenFromDashboard", "Management", "Address", "Email", "Nationality", "Remarks"];
 const SUMMARY_DEFINITIONS = [
-  { id: "total-count", title: "All pilots", description: "All pilot names in the dashboard.", matches: () => true },
+  { id: "total-count", title: "All pilots", description: "All pilot names currently shown on the dashboard.", matches: () => true },
   { id: "management-count", title: "Management pilots", description: "Pilots marked as management.", matches: (profile) => isManagementPilot(profile) },
   { id: "b737-total-count", title: "B737 pilots", description: "All pilots assigned to the B737 fleet.", matches: (profile) => isB737(profile.fleet) },
   { id: "atr72-total-count", title: "ATR72 pilots", description: "All pilots assigned to the ATR72 fleet.", matches: (profile) => isAtr72(profile.fleet) },
@@ -3209,13 +3224,14 @@ const SUMMARY_DEFINITIONS = [
 const SUMMARY_LOOKUP = new Map(SUMMARY_DEFINITIONS.map((summary) => [summary.id, summary]));
 const SUMMARY_COUNTERS = SUMMARY_DEFINITIONS.map((summary) => ({
   ...summary,
-  count: () => profiles.filter((profile) => summary.matches(profile)).length,
+  count: () => getDashboardProfiles().filter((profile) => summary.matches(profile)).length,
   element: document.querySelector(`#${summary.id}`),
 }));
 
 uploadInput?.addEventListener("change", handleUpload);
 searchInput.addEventListener("input", render);
 statusFilter.addEventListener("change", render);
+visibilityFilter.addEventListener("change", render);
 fleetFilter.addEventListener("change", render);
 rankFilter.addEventListener("change", render);
 sortFilter.addEventListener("change", render);
@@ -3369,6 +3385,7 @@ function normaliseRows(rows) {
         nationality: row.Nationality || "Nationality not recorded",
         email: row.Email || row.email || "Email not recorded",
         active: row.Status ? String(row.Status).toLowerCase() === "active" : true,
+        hidden: parseHiddenValue(row.HiddenFromDashboard ?? row.HideFromDashboard ?? row.Hidden),
         management: parseManagementValue(row.Management, remarks),
       });
     });
@@ -3442,6 +3459,9 @@ function render() {
       render();
     });
 
+    const badgeLabel = isHiddenFromDashboard(profile) ? "Hidden" : profile.active ? "Active" : "Inactive";
+    const badgeClass = isHiddenFromDashboard(profile) ? "hidden" : profile.active ? "" : "inactive";
+
     card.innerHTML = `
       <span class="avatar">${initials(profile.name)}</span>
       <span>
@@ -3449,7 +3469,7 @@ function render() {
         <p class="profile-meta">${escapeHtml(profile.staffNo)} | ${escapeHtml(profile.rank)} | ${escapeHtml(profile.fleet)}</p>
         <p class="profile-address">${escapeHtml(profile.address)}</p>
       </span>
-      <span class="badge ${profile.active ? "" : "inactive"}">${profile.active ? "Active" : "Inactive"}</span>
+      <span class="badge ${badgeClass}">${badgeLabel}</span>
     `;
 
     profileList.appendChild(card);
@@ -3554,6 +3574,7 @@ function renderImportSample(profile) {
 function getFilteredProfiles() {
   const query = searchInput.value.trim().toLowerCase();
   const status = statusFilter.value;
+  const visibility = visibilityFilter.value;
   const fleet = fleetFilter.value;
   const rank = rankFilter.value;
   const sortBy = sortFilter.value;
@@ -3562,13 +3583,17 @@ function getFilteredProfiles() {
     .filter((profile) => {
       const matchesStatus =
         status === "all" || (status === "active" && profile.active) || (status === "inactive" && !profile.active);
+      const matchesVisibility =
+        visibility === "all" ||
+        (visibility === "visible" && !isHiddenFromDashboard(profile)) ||
+        (visibility === "hidden" && isHiddenFromDashboard(profile));
       const matchesFleet =
         fleet === "all" || (fleet === "b737" && isB737(profile.fleet)) || (fleet === "atr72" && isAtr72(profile.fleet));
       const matchesRank = rank === "all" || matchesRankFilter(profile.rank, rank);
       const searchable = [profile.name, profile.staffNo, profile.rank, profile.fleet, profile.address, profile.remarks]
         .join(" ")
         .toLowerCase();
-      return matchesStatus && matchesFleet && matchesRank && (!query || searchable.includes(query));
+      return matchesStatus && matchesVisibility && matchesFleet && matchesRank && (!query || searchable.includes(query));
     })
     .sort((firstProfile, secondProfile) => compareProfiles(firstProfile, secondProfile, sortBy));
 }
@@ -3582,7 +3607,7 @@ function updateCounters() {
 }
 
 function countProfiles({ active, fleet, rank }) {
-  return profiles.filter((profile) => profile.active === active && fleet(profile.fleet) && rank(profile.rank)).length;
+  return getDashboardProfiles().filter((profile) => profile.active === active && fleet(profile.fleet) && rank(profile.rank)).length;
 }
 
 function isB737(fleet) {
@@ -3662,8 +3687,34 @@ function parseManagementValue(value, remarks = "") {
 function normaliseProfileRecord(profile) {
   return {
     ...profile,
+    hidden: parseHiddenValue(profile.hidden),
     management: parseManagementValue(profile.management, profile.remarks),
   };
+}
+
+function parseHiddenValue(value) {
+  if (typeof value === "boolean") {
+    return value;
+  }
+
+  const normalisedValue = String(value || "").trim().toLowerCase();
+  if (["true", "yes", "y", "hidden", "hide"].includes(normalisedValue)) {
+    return true;
+  }
+
+  if (["false", "no", "n", "visible", "show", ""].includes(normalisedValue)) {
+    return false;
+  }
+
+  return false;
+}
+
+function isHiddenFromDashboard(profile) {
+  return Boolean(profile?.hidden);
+}
+
+function getDashboardProfiles() {
+  return profiles.filter((profile) => !isHiddenFromDashboard(profile));
 }
 
 function isManagementPilot(profile) {
@@ -3673,6 +3724,7 @@ function isManagementPilot(profile) {
 function clearFilters() {
   searchInput.value = "";
   statusFilter.value = "all";
+  visibilityFilter.value = "visible";
   fleetFilter.value = "all";
   rankFilter.value = "all";
   sortFilter.value = "name";
@@ -3720,7 +3772,7 @@ function getSummaryProfiles(summaryId) {
   }
 
   return profiles
-    .filter((profile) => summary.matches(profile))
+    .filter((profile) => !isHiddenFromDashboard(profile) && summary.matches(profile))
     .sort((firstProfile, secondProfile) => compareProfiles(firstProfile, secondProfile, "name"));
 }
 
@@ -3794,6 +3846,7 @@ function createBlankProfile() {
     fleet: "B737-800",
     nationality: "",
     email: "",
+    hidden: false,
     management: false,
     active: true,
   };
@@ -3838,6 +3891,10 @@ function renderDetails(profile) {
       <div>
         <dt>Staff Number</dt>
         <dd>${escapeHtml(profile.staffNo)}</dd>
+      </div>
+      <div>
+        <dt>Dashboard Visibility</dt>
+        <dd>${isHiddenFromDashboard(profile) ? "Hidden from dashboard" : "Visible on dashboard"}</dd>
       </div>
       <div>
         <dt>Management</dt>
@@ -3920,6 +3977,14 @@ function renderEditForm(profile, isNewProfile = false) {
         <select name="management">
           <option value="false" ${isManagementPilot(profile) ? "" : "selected"}>No</option>
           <option value="true" ${isManagementPilot(profile) ? "selected" : ""}>Yes</option>
+        </select>
+      </label>
+
+      <label>
+        Hide From Dashboard
+        <select name="hidden">
+          <option value="false" ${isHiddenFromDashboard(profile) ? "" : "selected"}>No</option>
+          <option value="true" ${isHiddenFromDashboard(profile) ? "selected" : ""}>Yes</option>
         </select>
       </label>
 
@@ -4018,6 +4083,7 @@ function exportProfilesCsv() {
     profile.rank,
     profile.fleet,
     profile.active ? "Active" : "Inactive",
+    isHiddenFromDashboard(profile) ? "Yes" : "No",
     isManagementPilot(profile) ? "Yes" : "No",
     profile.address,
     profile.email,
@@ -4102,6 +4168,7 @@ function handleProfileSave(event) {
     email: clean(form.get("email")) || "Email not recorded",
     nationality: clean(form.get("nationality")) || "Nationality not recorded",
     remarks: clean(form.get("remarks")) || "No remarks recorded",
+    hidden: form.get("hidden") === "true",
     management: form.get("management") === "true",
     active: form.get("active") === "true",
   };
