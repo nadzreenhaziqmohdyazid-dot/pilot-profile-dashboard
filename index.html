@@ -230,6 +230,13 @@ h3 {
   transform: translateY(-3px);
 }
 
+.status-row article.is-selected {
+  border-color: var(--accent);
+  box-shadow:
+    inset 0 0 0 2px rgba(230, 81, 0, 0.22),
+    var(--shadow-strong);
+}
+
 .status-row span {
   display: block;
   margin-bottom: 6px;
@@ -613,6 +620,44 @@ h3 {
   display: grid;
   gap: 12px;
   margin: 0;
+}
+
+.summary-list-card {
+  display: grid;
+  gap: 14px;
+}
+
+.summary-list-meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.summary-name-list {
+  display: grid;
+  gap: 10px;
+}
+
+.summary-name-item {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 12px;
+  background: linear-gradient(90deg, #fff, #f8fcfb);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.summary-name-item h3 {
+  margin-bottom: 4px;
+  font-size: 0.98rem;
+}
+
+.summary-name-item .avatar {
+  width: 52px;
+  height: 52px;
 }
 
 .detail-list div {
@@ -1036,71 +1081,71 @@ h3 {
       </section>
 
       <section class="status-row" id="summary-row" aria-label="Dashboard summary">
-        <article class="summary-total" data-status="all" data-fleet="all" data-rank="all" tabindex="0">
+        <article class="summary-total" data-summary-id="total-count" tabindex="0">
           <span id="total-count">0</span>
           <p>Total pilots</p>
         </article>
-        <article class="summary-management">
+        <article class="summary-management" data-summary-id="management-count" tabindex="0">
           <span id="management-count">0</span>
           <p>Management pilots</p>
         </article>
-        <article class="summary-fleet">
+        <article class="summary-fleet" data-summary-id="b737-total-count" tabindex="0">
           <span id="b737-total-count">0</span>
           <p>Total B737 pilots</p>
         </article>
-        <article class="summary-fleet">
+        <article class="summary-fleet" data-summary-id="atr72-total-count" tabindex="0">
           <span id="atr72-total-count">0</span>
           <p>Total ATR72 pilots</p>
         </article>
-        <article class="summary-active">
+        <article class="summary-active" data-summary-id="b737-captain-count" tabindex="0">
           <span id="b737-captain-count">0</span>
           <p>Total B737 Captains</p>
         </article>
-        <article class="summary-active">
+        <article class="summary-active" data-summary-id="b737-fo-count" tabindex="0">
           <span id="b737-fo-count">0</span>
           <p>Total B737 FOs</p>
         </article>
-        <article class="summary-active">
+        <article class="summary-active" data-summary-id="atr72-captain-count" tabindex="0">
           <span id="atr72-captain-count">0</span>
           <p>Total ATR72 Captains</p>
         </article>
-        <article class="summary-active">
+        <article class="summary-active" data-summary-id="atr72-fo-count" tabindex="0">
           <span id="atr72-fo-count">0</span>
           <p>Total ATR72 FOs</p>
         </article>
-        <article class="summary-inactive" data-status="inactive" data-fleet="all" data-rank="all" tabindex="0">
+        <article class="summary-inactive" data-summary-id="inactive-count" tabindex="0">
           <span id="inactive-count">0</span>
           <p>Inactive pilots</p>
         </article>
-        <article class="summary-active" data-status="active" data-fleet="b737" data-rank="captain" tabindex="0">
+        <article class="summary-active" data-summary-id="b737-active-captain-count" tabindex="0">
           <span id="b737-active-captain-count">0</span>
           <p>B737 Active Captains</p>
         </article>
-        <article class="summary-active" data-status="active" data-fleet="b737" data-rank="copilot" tabindex="0">
+        <article class="summary-active" data-summary-id="b737-active-copilot-count" tabindex="0">
           <span id="b737-active-copilot-count">0</span>
           <p>B737 Active Co Pilots</p>
         </article>
-        <article class="summary-active" data-status="active" data-fleet="atr72" data-rank="captain" tabindex="0">
+        <article class="summary-active" data-summary-id="atr72-active-captain-count" tabindex="0">
           <span id="atr72-active-captain-count">0</span>
           <p>ATR72 Active Captains</p>
         </article>
-        <article class="summary-active" data-status="active" data-fleet="atr72" data-rank="copilot" tabindex="0">
+        <article class="summary-active" data-summary-id="atr72-active-copilot-count" tabindex="0">
           <span id="atr72-active-copilot-count">0</span>
           <p>ATR72 Active Co Pilots</p>
         </article>
-        <article class="summary-inactive" data-status="inactive" data-fleet="b737" data-rank="captain" tabindex="0">
+        <article class="summary-inactive" data-summary-id="b737-inactive-captain-count" tabindex="0">
           <span id="b737-inactive-captain-count">0</span>
           <p>B737 Inactive Captains</p>
         </article>
-        <article class="summary-inactive" data-status="inactive" data-fleet="b737" data-rank="copilot" tabindex="0">
+        <article class="summary-inactive" data-summary-id="b737-inactive-copilot-count" tabindex="0">
           <span id="b737-inactive-copilot-count">0</span>
           <p>B737 Inactive Co Pilots</p>
         </article>
-        <article class="summary-inactive" data-status="inactive" data-fleet="atr72" data-rank="captain" tabindex="0">
+        <article class="summary-inactive" data-summary-id="atr72-inactive-captain-count" tabindex="0">
           <span id="atr72-inactive-captain-count">0</span>
           <p>ATR72 Inactive Captains</p>
         </article>
-        <article class="summary-inactive" data-status="inactive" data-fleet="atr72" data-rank="copilot" tabindex="0">
+        <article class="summary-inactive" data-summary-id="atr72-inactive-copilot-count" tabindex="0">
           <span id="atr72-inactive-copilot-count">0</span>
           <p>ATR72 Inactive Co Pilots</p>
         </article>
@@ -1172,7 +1217,7 @@ h3 {
         <aside class="details-panel" aria-labelledby="details-title">
           <div class="details-panel-head">
             <div>
-              <p class="eyebrow">Selected Profile</p>
+              <p class="eyebrow" id="details-context-label">Selected Profile</p>
               <h2 id="details-title">Pilot details</h2>
             </div>
             <button id="details-mobile-close" class="details-mobile-close" type="button" data-action="close-drawer">
@@ -3125,6 +3170,8 @@ const visibleCount = document.querySelector("#visible-count");
 const embeddedProfilesScript = document.querySelector("#embedded-profiles");
 const detailsPanel = document.querySelector(".details-panel");
 const drawerBackdrop = document.querySelector("#drawer-backdrop");
+const detailsContextLabel = document.querySelector("#details-context-label");
+const detailsTitle = document.querySelector("#details-title");
 
 const STORAGE_KEY = "pilotProfileDashboard.profiles";
 const SELECTED_KEY = "pilotProfileDashboard.selectedStaffNo";
@@ -3135,29 +3182,36 @@ let selectedStaffNo = "";
 let isAddingProfile = false;
 let pendingImport = null;
 let isMobileDrawerOpen = false;
+let activeSummaryId = "";
 
 const FLEET_OPTIONS = ["ATR72-500", "B737-800"];
 const RANK_OPTIONS = ["Captain", "First Officer", "Second Officer"];
 const EXPORT_HEADERS = ["StaffNo", "Name", "Rank", "Fleet", "Status", "Management", "Address", "Email", "Nationality", "Remarks"];
-const SUMMARY_COUNTERS = [
-  { id: "total-count", count: () => profiles.length },
-  { id: "management-count", count: () => profiles.filter((profile) => isManagementPilot(profile)).length },
-  { id: "b737-total-count", count: () => profiles.filter((profile) => isB737(profile.fleet)).length },
-  { id: "atr72-total-count", count: () => profiles.filter((profile) => isAtr72(profile.fleet)).length },
-  { id: "b737-captain-count", count: () => profiles.filter((profile) => isB737(profile.fleet) && isCaptainRank(profile.rank)).length },
-  { id: "b737-fo-count", count: () => profiles.filter((profile) => isB737(profile.fleet) && isCopilotRank(profile.rank)).length },
-  { id: "atr72-captain-count", count: () => profiles.filter((profile) => isAtr72(profile.fleet) && isCaptainRank(profile.rank)).length },
-  { id: "atr72-fo-count", count: () => profiles.filter((profile) => isAtr72(profile.fleet) && isCopilotRank(profile.rank)).length },
-  { id: "inactive-count", count: () => profiles.filter((profile) => !profile.active).length },
-  { id: "b737-active-captain-count", count: () => countProfiles({ active: true, fleet: isB737, rank: isCaptainRank }) },
-  { id: "b737-active-copilot-count", count: () => countProfiles({ active: true, fleet: isB737, rank: isCopilotRank }) },
-  { id: "atr72-active-captain-count", count: () => countProfiles({ active: true, fleet: isAtr72, rank: isCaptainRank }) },
-  { id: "atr72-active-copilot-count", count: () => countProfiles({ active: true, fleet: isAtr72, rank: isCopilotRank }) },
-  { id: "b737-inactive-captain-count", count: () => countProfiles({ active: false, fleet: isB737, rank: isCaptainRank }) },
-  { id: "b737-inactive-copilot-count", count: () => countProfiles({ active: false, fleet: isB737, rank: isCopilotRank }) },
-  { id: "atr72-inactive-captain-count", count: () => countProfiles({ active: false, fleet: isAtr72, rank: isCaptainRank }) },
-  { id: "atr72-inactive-copilot-count", count: () => countProfiles({ active: false, fleet: isAtr72, rank: isCopilotRank }) },
-].map((counter) => ({ ...counter, element: document.querySelector(`#${counter.id}`) }));
+const SUMMARY_DEFINITIONS = [
+  { id: "total-count", title: "All pilots", description: "All pilot names in the dashboard.", matches: () => true },
+  { id: "management-count", title: "Management pilots", description: "Pilots marked as management.", matches: (profile) => isManagementPilot(profile) },
+  { id: "b737-total-count", title: "B737 pilots", description: "All pilots assigned to the B737 fleet.", matches: (profile) => isB737(profile.fleet) },
+  { id: "atr72-total-count", title: "ATR72 pilots", description: "All pilots assigned to the ATR72 fleet.", matches: (profile) => isAtr72(profile.fleet) },
+  { id: "b737-captain-count", title: "B737 captains", description: "All B737 captains.", matches: (profile) => isB737(profile.fleet) && isCaptainRank(profile.rank) },
+  { id: "b737-fo-count", title: "B737 first and second officers", description: "All B737 FOs and SOs.", matches: (profile) => isB737(profile.fleet) && isCopilotRank(profile.rank) },
+  { id: "atr72-captain-count", title: "ATR72 captains", description: "All ATR72 captains.", matches: (profile) => isAtr72(profile.fleet) && isCaptainRank(profile.rank) },
+  { id: "atr72-fo-count", title: "ATR72 first and second officers", description: "All ATR72 FOs and SOs.", matches: (profile) => isAtr72(profile.fleet) && isCopilotRank(profile.rank) },
+  { id: "inactive-count", title: "Inactive pilots", description: "Pilots currently marked inactive.", matches: (profile) => !profile.active },
+  { id: "b737-active-captain-count", title: "Active B737 captains", description: "Active captains in the B737 fleet.", matches: (profile) => profile.active && isB737(profile.fleet) && isCaptainRank(profile.rank) },
+  { id: "b737-active-copilot-count", title: "Active B737 co-pilots", description: "Active B737 first and second officers.", matches: (profile) => profile.active && isB737(profile.fleet) && isCopilotRank(profile.rank) },
+  { id: "atr72-active-captain-count", title: "Active ATR72 captains", description: "Active captains in the ATR72 fleet.", matches: (profile) => profile.active && isAtr72(profile.fleet) && isCaptainRank(profile.rank) },
+  { id: "atr72-active-copilot-count", title: "Active ATR72 co-pilots", description: "Active ATR72 first and second officers.", matches: (profile) => profile.active && isAtr72(profile.fleet) && isCopilotRank(profile.rank) },
+  { id: "b737-inactive-captain-count", title: "Inactive B737 captains", description: "Inactive captains in the B737 fleet.", matches: (profile) => !profile.active && isB737(profile.fleet) && isCaptainRank(profile.rank) },
+  { id: "b737-inactive-copilot-count", title: "Inactive B737 co-pilots", description: "Inactive B737 first and second officers.", matches: (profile) => !profile.active && isB737(profile.fleet) && isCopilotRank(profile.rank) },
+  { id: "atr72-inactive-captain-count", title: "Inactive ATR72 captains", description: "Inactive captains in the ATR72 fleet.", matches: (profile) => !profile.active && isAtr72(profile.fleet) && isCaptainRank(profile.rank) },
+  { id: "atr72-inactive-copilot-count", title: "Inactive ATR72 co-pilots", description: "Inactive ATR72 first and second officers.", matches: (profile) => !profile.active && isAtr72(profile.fleet) && isCopilotRank(profile.rank) },
+];
+const SUMMARY_LOOKUP = new Map(SUMMARY_DEFINITIONS.map((summary) => [summary.id, summary]));
+const SUMMARY_COUNTERS = SUMMARY_DEFINITIONS.map((summary) => ({
+  ...summary,
+  count: () => profiles.filter((profile) => summary.matches(profile)).length,
+  element: document.querySelector(`#${summary.id}`),
+}));
 
 uploadInput?.addEventListener("change", handleUpload);
 searchInput.addEventListener("input", render);
@@ -3370,6 +3424,7 @@ function render() {
   pendingImport = null;
   isAddingProfile = false;
   updateCounters();
+  updateSummarySelectionState();
 
   const filtered = getFilteredProfiles();
   visibleCount.textContent = `${filtered.length} shown`;
@@ -3381,6 +3436,7 @@ function render() {
     card.type = "button";
     card.setAttribute("aria-selected", String(profile.staffNo === selectedStaffNo));
     card.addEventListener("click", () => {
+      activeSummaryId = "";
       selectedStaffNo = profile.staffNo;
       openMobileDrawer();
       render();
@@ -3400,6 +3456,12 @@ function render() {
   });
 
   const selected = filtered.find((profile) => profile.staffNo === selectedStaffNo) || filtered[0];
+  if (activeSummaryId) {
+    renderSummaryDetails(activeSummaryId);
+    syncMobileDrawer({ id: activeSummaryId });
+    return;
+  }
+
   renderDetails(selected);
   syncMobileDrawer(selected || null);
 }
@@ -3614,16 +3676,17 @@ function clearFilters() {
   fleetFilter.value = "all";
   rankFilter.value = "all";
   sortFilter.value = "name";
+  activeSummaryId = "";
   render();
 }
 
 function handleSummaryClick(event) {
-  const summaryCard = event.target.closest("[data-status]");
+  const summaryCard = event.target.closest("[data-summary-id]");
   if (!summaryCard) {
     return;
   }
 
-  applySummaryFilter(summaryCard);
+  showSummaryList(summaryCard.dataset.summaryId);
 }
 
 function handleSummaryKeydown(event) {
@@ -3631,21 +3694,86 @@ function handleSummaryKeydown(event) {
     return;
   }
 
-  const summaryCard = event.target.closest("[data-status]");
+  const summaryCard = event.target.closest("[data-summary-id]");
   if (!summaryCard) {
     return;
   }
 
   event.preventDefault();
-  applySummaryFilter(summaryCard);
+  showSummaryList(summaryCard.dataset.summaryId);
 }
 
-function applySummaryFilter(summaryCard) {
-  searchInput.value = "";
-  statusFilter.value = summaryCard.dataset.status || "all";
-  fleetFilter.value = summaryCard.dataset.fleet || "all";
-  rankFilter.value = summaryCard.dataset.rank || "all";
+function showSummaryList(summaryId) {
+  if (!SUMMARY_LOOKUP.has(summaryId)) {
+    return;
+  }
+
+  activeSummaryId = summaryId;
+  openMobileDrawer();
   render();
+}
+
+function getSummaryProfiles(summaryId) {
+  const summary = SUMMARY_LOOKUP.get(summaryId);
+  if (!summary) {
+    return [];
+  }
+
+  return profiles
+    .filter((profile) => summary.matches(profile))
+    .sort((firstProfile, secondProfile) => compareProfiles(firstProfile, secondProfile, "name"));
+}
+
+function updateSummarySelectionState() {
+  const summaryCards = summaryRow.querySelectorAll("[data-summary-id]");
+  summaryCards.forEach((card) => {
+    const isSelected = card.dataset.summaryId === activeSummaryId;
+    card.classList.toggle("is-selected", isSelected);
+    card.setAttribute("aria-pressed", String(isSelected));
+  });
+}
+
+function setDetailsHeading(contextLabel, title) {
+  detailsContextLabel.textContent = contextLabel;
+  detailsTitle.textContent = title;
+}
+
+function renderSummaryDetails(summaryId) {
+  const summary = SUMMARY_LOOKUP.get(summaryId);
+  const matchingProfiles = getSummaryProfiles(summaryId);
+
+  if (!summary) {
+    setDetailsHeading("Selected Profile", "Pilot details");
+    renderDetails(getCurrentVisibleSelection());
+    return;
+  }
+
+  setDetailsHeading("Dashboard Summary", summary.title);
+
+  if (!matchingProfiles.length) {
+    profileDetails.className = "details-empty";
+    profileDetails.textContent = `No pilots match ${summary.title.toLowerCase()}.`;
+    return;
+  }
+
+  profileDetails.className = "summary-list-card";
+  profileDetails.innerHTML = `
+    <div>
+      <p class="summary-list-meta">${escapeHtml(summary.description)}</p>
+      <p class="summary-list-meta">${escapeHtml(String(matchingProfiles.length))} pilot${matchingProfiles.length === 1 ? "" : "s"} in this list.</p>
+    </div>
+    <div class="summary-name-list">
+      ${matchingProfiles.map((profile) => `
+        <article class="summary-name-item">
+          <span class="avatar">${initials(profile.name)}</span>
+          <span>
+            <h3>${escapeHtml(profile.name)}</h3>
+            <p class="profile-meta">${escapeHtml(profile.staffNo)} | ${escapeHtml(profile.rank)} | ${escapeHtml(profile.fleet)}</p>
+          </span>
+        </article>
+      `).join("")}
+    </div>
+  `;
 }
 
 function startNewProfile() {
@@ -3682,6 +3810,8 @@ function rankOption(value, selectedRank) {
 }
 
 function renderDetails(profile) {
+  setDetailsHeading("Selected Profile", "Pilot details");
+
   if (!profile) {
     profileDetails.className = "details-empty";
     profileDetails.textContent = profiles.length ? "No profile matches the current filter." : "Select a profile to view details.";
@@ -3734,6 +3864,7 @@ function renderDetails(profile) {
 }
 
 function renderEditForm(profile, isNewProfile = false) {
+  setDetailsHeading("Pilot Form", isNewProfile ? "Add pilot" : "Edit pilot");
   profileDetails.className = "detail-card";
   profileDetails.innerHTML = `
     <form class="edit-form" id="edit-profile-form">
