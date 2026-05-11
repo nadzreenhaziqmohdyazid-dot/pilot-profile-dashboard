@@ -3602,7 +3602,7 @@ function isMobileViewport() {
   return window.matchMedia("(max-width: 560px)").matches;
 }
 
-function syncMobileDrawer(profile) {
+function syncMobileDrawer(profile, forceOpen = false) {
   if (!isMobileViewport()) {
     isMobileDrawerOpen = false;
     document.body.classList.remove("drawer-open");
@@ -3612,7 +3612,7 @@ function syncMobileDrawer(profile) {
     return;
   }
 
-  const shouldOpen = Boolean(profile) && isMobileDrawerOpen;
+  const shouldOpen = isMobileDrawerOpen && (forceOpen || Boolean(profile) || Boolean(pendingImport));
   document.body.classList.toggle("drawer-open", shouldOpen);
   detailsPanel.classList.toggle("is-open", shouldOpen);
   drawerBackdrop.classList.toggle("is-visible", shouldOpen);
@@ -3652,11 +3652,15 @@ function handleUpload(event) {
   reader.onload = () => {
     try {
       pendingImport = buildImportPreview(parseCsv(String(reader.result)), file.name);
+      openMobileDrawer();
       renderImportPreview();
+      syncMobileDrawer(null);
     } catch (error) {
       pendingImport = null;
+      openMobileDrawer();
       profileDetails.className = "details-empty";
       profileDetails.textContent = error.message;
+      syncMobileDrawer(null, true);
     }
   };
   reader.readAsText(file);
